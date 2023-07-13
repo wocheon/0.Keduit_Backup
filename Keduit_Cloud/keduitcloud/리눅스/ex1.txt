@@ -1,0 +1,24 @@
+data
+northwest              NW       Joel Craig             3.0   .98   3    4
+western                WE       Sharon Kelly           5.3   .97   5    23
+southwest              SW       Chris Foster           2.7   .8    2    18
+southern               SO       May Chin               5.1   .95   4    15
+southeast              SE       Derek Johnson          4.0   .7    4    17
+eastern                EA       Susan Beal             4.4   .84   5    20
+northeast              NE       TJ Nichols             5.1   .94   3    13
+north                  NO       Val Shultz             4.5   .89   5    9
+central                CT       Sheri Watson           5.7   .94   5    13
+
+
+west 라는 글이 있는 줄 출력
+north로 시작하는 줄 출력
+no 또는 so 로 시작하는 줄 출력
+datafile 리스트의 세 번째 와 두 번째 필드를 스페이스로 띄어서 출력
+datafile 리스트의 세 번째 와 두 번째 필드를 그냥 붙여서 출력
+datafile의 각 줄마다의 필드수를 리턴한다.
+만약 레코드가 n 이나 s로 시작되면, 첫 번째 필드가 출력
+다섯 번째 필드가 마침표 다음에 7과 9사이 숫자가 하나 이상 나오는 레코드 출력
+두 번째 필드에 E 패턴이 없는 레코드의 첫 번째와 두 번째 필드 출력
+세 번째 필드가 Joel로 시작하면 세번째 필드에 이어서 " is a nice guy"와 함께 출력
+여덟 번째 필드가 두 자리 숫자이면 해당 필드가 출력
+네 번째 필드가 Chine으로 끝나면 "The price is $" 8번 필드 및 마침표가 출력

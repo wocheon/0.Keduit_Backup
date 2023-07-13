@@ -1,0 +1,103 @@
+
+1번문제
+nmcli con mod ens33 ipv4.method manual ipv4.address "192.168.100.150/24" ipv4.gateway "192.168.100.2" ipv4.dns "8.8.8.8"
+nmcli con reload
+nmcli con up ens33
+
+hostnamectl set-hostname koreait
+
+
+2.
+vi /etc/yum.repos.d/kaist.repo
+i
+[kaist]
+name=kaist
+baseurl=http://ftp.kaist.ac.kr/CentOS/7.8.2003/os/x86_64
+enabled=1
+gpgcheck=0
+esc
+:wq
+
+rm /etc/yum.repos.d/Cent*
+
+3.
+useradd -G wheel user0529
+
+
+4.
+mkdir /tmp/test
+touch /tmp/test/num2
+chmod 766 /tmp/test/num2
+setfacl -m u:user0529:4 /tmp/test/num2
+
+5.
+fdist /dev/sdb 
+n
++2G
+
+n
++1G
+
+n
++3G
+
+n
+p
+enter
+
+w
+
+vgcreate vg0 /dev/sdb3
+lvcreate vg0 -L 1G -n lv1
+lvcreate vg0 -L 0.5G -n lv2
+lvcreate vg0 -L 1.2G -n lv3
+
+mkdir -p /tmp/test/num3/disk{1..3}
+
+mkfs.xfs /dev/vg0/lv1
+mkfs.xfs /dev/vg0/lv2
+mkfs.xfs /dev/vg0/lv3
+
+mkfs.ext4 /dev/sb1
+mkfs.ext4 /dev/sb2
+
+vi /etc/fstab
+G
+o
+/dev/vg0/lv3 /tmp/test/num3/disk1 xfs defaults 1 1
+/dev/sdb1 /tmp/test/num3/disk2 ext4 defaults 1 1
+/dev/sdb2 /tmp/test/num3/disk3 ext4 defaults 1 1
+esc
+:wq
+
+mount -a
+
+6.
+mkswap /dev/sdb4
+vi /etc/fstab
+G
+o
+/dev/sdb4 swap swap defaults 0 0
+esc 
+:wq
+swapon -a
+
+7.
+systemctl status firewalld
+yum install -y httpd
+systemctl start httpd.service
+systemctl enable httpd.service
+mkdir -p /var/www/html
+vi /var/www/html/index.html
+i
+hello world!
+esc
+:wq
+
+firewall-cmd --permanent --new-zone=webserver
+firewall-cmd --permanent --zone=webserver --add-port=22/tcp
+firewall-cmd --permanent --zone=webserver --add-service=http
+firewall-cmd --permanent --zone=webserver --add-service=https
+firewall-cmd --reload
+
+

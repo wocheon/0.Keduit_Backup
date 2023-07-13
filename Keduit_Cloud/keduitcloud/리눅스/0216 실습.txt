@@ -1,0 +1,231 @@
+﻿vimtutor 실행
+
+/root/vimtutor로 다른 저장하시오.
+
+:w /root/vimtutor
+
+vimtutor 종료 후
+
+:q
+
+/root/vimtutor 파일 vim 편집기로 실행
+
+vi /root/vimtutor
+
+1번 라인을 복사해서 3번 라인 아래에 붙여넣으시오.
+
+1G or gg
+3G
+p
+
+or
+
+:1 co 3
+
+vim 이라는 단어를 123 로 문서 전체를 변경하시오.
+
+:% s/vim/123/g
+
+1번부터 20번 사이에 123을 다시 vim으로 변경하시오.
+
+:1,20 s/123/vim/g
+
+2번라인부터 5번라인까지 복사해서 10번 라인에 붙여넣으시오.
+
+2G
+4yy
+10G
+P
+
+or
+
+:2,5 co 9
+
+1라인부터 10번라인을 잘라내서 마지막 라인 위로 붙여넣으시오.
+
+1G or gg
+10dd
+G
+P
+
+or
+
+:1,10 m 마지막 라인 전 번호
+
+30번 라인부터 40번 라인까지 삭제하시오.
+
+30G
+11dd
+
+or
+
+:30,40 d
+
+1번 라인의 내용만 삭제하면서 123 이라는 단어를 쓰시오.
+
+1G or gg
+cc or S or V-d-i
+123
+esc
+
+==================================================================
+
+쉘 메타문자 실습
+
+root로 접속
+
+1. /etc/ 로 이동 후에 틸드 문자를 사용해서 현 사용자의 디렉토리로 이동하시오.
+
+cd /etc/
+
+cd ~/
+
+2. /etc/sysconfig/network-scripts/ 로 이동 후에 홈으로 다시 이동 - 문자를 사용해서 이동해 보시오.
+
+cd /etc/sysconfig/network-scripts
+
+cd -
+
+3. 자신의 홈디렉토리로 이동 /etc/sysconfig/network-scripts 디렉토리의 내용을 확인해보시오. (틸드 문자 이용)
+
+ls ~-/
+
+4. /media 디렉토리 안에 superman-season(1~3) 디렉토리를 각각 만들고 superman-season(1~3)-drama(01~10).avi 파일 생성 후에 이름에 맞추어서 각각 넣으시오. 파일 이동시 최대한 간단하게 작성해보시오.
+ex)
+directory명 : superman-season1 
+file명 : superman-season1-drama01.avi
+
+mkdir /media/superman-season{1..3}
+touch /media/superman-season{1..3}-drama{01..10}.avi
+mv /media/*n1*i /media/*n1
+mv /medai/*n2*i /media/*n2
+mv /medai/*n3*i /media/*n3
+
+
+
+========================================================
+
+리디렉션 및 파이프 
+실습
+
+centos 로 로그인
+su - centos
+
+1. ls -lR / 의 정상 출력 값은  ~/r01에 입력하고 에러값은 ~/r02에 입력하시오.
+
+ls -lR / 1> r01 2> r02
+
+2. ls -lR / 의 모든 출력 값을 ~/r03에 입력하시오.
+
+ls -lR &> r03
+
+or
+
+ls -lR > r03 2>&1
+
+root 로 사용자전환
+
+3. ps -ef 의 출력값을 한화면씩 끊어서 보시오.
+
+ps -ef | more
+
+or
+
+ps -ef | less
+
+4. yum list 의 결과값 중에서 ssh 라는 패턴이 들어가는 것을 출력해보시오.
+
+yum list | grep ssh
+
+===========================================================================
+
+프로세스 실습
+
+터미널 4개 열 것
+각 장치별로 sleep 1000 부터 4000 까지 백그라운드로 실행
+(pts/0=>sleep 1000, pts/1=>sleep 2000, pts/2 => sleep 3000, pts/3=>sleep 4000 각각 실행 )
+터미널 pts/0 에서 gedit과 firefox를 백그라운드로 실행
+
+pts/0 => sleep 1000 &
+pts/1 => sleep 2000 &
+pts/2 => sleep 3000 &
+pts/3 => sleep 4000 &
+
+pts/0 => gedit &
+pts/0 => firefox &
+
+
+1. sleep, gedit, firefox 의 PID 와 PPID 가 무엇인지 확인
+
+ps -ef | egrep '(sleep|gedit|firefox|bash)'
+
+2. pts/2 번에서 sleep 20000 을 포그라운드로 실행시키고 백그라운드로 보내 볼 것
+
+sleep 20000
+ctrl+z
+jobs
+bg %해당 작업번호
+or
+bg +
+
+3. firefox를 kill 명령어로 kill 해볼 것
+
+kill -15 or -TERM or -SIGTERM firefox의 pid
+
+4. gedit을 pkill 명령어로 kill 해볼 것
+
+pkill gedit
+
+5. pts/0, pts/3의 sleep 프로세스를 kill 할 것
+
+pkill -t pts/0,pts/3 sleep
+
+6. 모든 bash 쉘 킬 할 것. 
+
+killall -9 bash
+
+or
+
+pkill -9 bash
+
+7. nice 값 -11의 우선순위로 sleep 2000을 실행시키시오. (확인 ps -l | egrep '(sleep|NI)'
+
+nice -n -11 sleep 2000 &
+
+ps -l | egrep '(sleep|NI)'
+
+8. sleep 2000의 우선순위를 -15로 수정하시오.
+
+ps -l | egrep '(sleep|NI)'
+
+renice -n -15 해당PID
+
+centos로 사용자 전환
+
+su - centos
+
+9. 위에 7번을 실행해보시오.
+
+nice -n -11 sleep 2000 &
+
+에러 발생 : 일반사용자는 nice 값을 음수로 취할 수 없다.
+
+10. nice 값을 5로 sleep 2000 을 실행시키시오.
+
+nice -n 5 sleep 2000 &
+
+11. nice 값을 4로 수정해보시오.
+
+ps -l | egrep '(sleep|NI)'
+
+renice -n 4 해당PID
+
+에러발생 : 일반사용자는 nice 값을 낮출 수 없다.
+
+12. nice 값을 10으로 수정해보시오.
+
+ps -l | egrep '(sleep|NI)'
+
+renice -n 10 해당PID
+
+=======================================================

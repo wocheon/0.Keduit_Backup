@@ -1,0 +1,97 @@
+﻿부트 프로세스 실습
+
+현재 default target 확인
+
+다른 target으로 변경
+
+target 전환
+
+root password 변경
+
+부트로더 ID/PASSWORD 설정
+
+부트로더 시간 20초로 설정
+
+================================================================================
+
+처음 설정으로 스냅샷
+
+DVD를 /media/cdrom으로 리마운트
+
+Repository 설정 - DVD 와 인터넷 (http://mirror.centos.org/centos/7/os/x86_64)
+
+repo 활성화 상태 확인
+
+repo 중에서 dvd repo를 비활성화 시키시오.
+
+repo 활성화 상태 확인
+
+저장소에 telnet에 대한 패키지가 어떠한 것이 있는지 확인해보시오.
+
+telnet 관련 패키지 설치
+
+telnet.socket 시작 및 활성화
+
+telnet 패키지의 설정 파일 및 문서(document) 확인
+
+rsyslog.conf 파일이 어떠한 패키지로 인해서 생성된 것인지 확인(2가지 방법)
+
+위에 패키지의 정보를 확인 (2가지 방법)
+
+그룹 패키지 중에서 패키지명으로 security 가 들어간 패키지는?
+
+해당 그룹 패키지는 어떤 패키지들로 구성이 되어 있는가?
+
+kernel 업데이트를 해보시오.
+
+zsh-xxxxxxxxxxxxxx.rpm 파일을 yum 명령어를 사용해서 설치하시오.
+
+===========================================================================================
+
+네트워크 관리 명령어 정리
+
+nmcli device : device 종류를 볼 수 있음.
+
+nmcli connection show : connection 종류를 볼 수 있음
+
+nmcli con show "con-name" : connection의 자세한 정보
+
+nmcli con add con-name "connection 이름" ifname 물리 장치 type ethernet autoconnetion yes => dhcp 설정
+
+nmcli con add con-name "connection 이름" ifname 물리 장치 type ethernet autoconnetion yes ip4 "xxx.xxx.xxx.xxx/xx" gw4 "xxx.xxx.xxx.xxx" => 고정 아이피 설정
+
+nmcli con reload
+
+nmcli con up "connection 이름" 
+
+dhcp => 고정 아이피로 수정 한다고 했을 때
+
+nmcli con mod dhcp(con-name) ipv4.addresses "할당 아이피주소/프리픽스" ipv4.gateway "게이트웨이주소" ipv4.method manual connection.id 바꿀 con-name connection.interface-name (new device)
+
+--------------------------------------------------------------------------
+
+네트워크 실습
+
+초기 설정으로 초기화
+
+현재 IP 주소를  2가지 방법으로 확인해보시오.
+
+add로 연결 생성
+
+dhcp => 유동IP
+
+static1 => ip : 192.168.100.200/24, gw : 192.168.100.2 
+
+modify 로 연결 수정
+
+- dhcp 연결을 static 으로 이름 변경 후 
+- 192.168.100.100으로 고정 아이피 설정
+- 192.168.100.30 주소 추가
+- 8.8.8.8 dns 설정 
+- 자동 연결 안되도록 수정
+- method maual 로 설정 후 네트워크 연결 확인
+
+192.168.100.100 주소를 제거하시오.
+
+hostname을 aptstudy으로 설정
+

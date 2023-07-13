@@ -1,0 +1,85 @@
+실습용 윈도우 서버 다운로드
+\\10.5.1.100\cloud\utils\서버
+
+
+VMware vSphere : 
+ESXi -> hypervisor
+vCenter -> 하이퍼바이저를 통합관리하기 위한 서버(클러스터 구성)
+web client, vsphere client, power shell .. 
+
+vCenter 의 설치 : 
+1. 윈도우 서버에 iso 파일을 이용하여 설치 -> 윈도우 자체 기능인 AD 를 사용할 수 있다.
+2. appliance ova 파일(리눅스) : 리눅스에 vCenter 를 설치해 두었고 이를 이용하여 vCenter  를 사용할 수 있다. 
+
+vCenter 에 들어가는 DBMS 는 윈도우의 MSSQL, Oracle, MySQL 등을 사용할 수 있으며 규모가 크지 않은 회사의 경우에는 vCenter 에 내장된 DB 를 사용할 수 있다. 
+
+vmnet1: -> management (vCenter-ESXi 간 연결)
+vmnet2: -> NFS(ESXi-Storage 간 연결)  192.168.2.X
+esxi1     esxi2     nfs_server
+  11           12            13 
+
+vmnet3: -> vMotion(ESXi 간에 VM 을 이동시키기 위한 용도)
+vmnet4: -> FT
+
+vmnet8(NAT): -> (VM 배치용-VM  외부 연결용)
+
+1~4 : VMKernel PortGroup
+8 : vm portgroup
+
+1. nfs 서버 준비하기(NFS 서버의 NIC 는 vmnet2 번으로 변경한 뒤)
+vi /etc/sysconfig/net... 
+IPADDR = 192.168.2.13
+systemctl restart network
+
+mkdir /disk1 /disk2
+
+vi /etc/exports
+/disk1    192.168.2.0/24(rw,sync,no_root_squash)
+/disk2    192.168.2.0/24(rw,sync,no_root_squash)
+
+systemctl restart nfs-server
+
+2. esxi 설정하기
+첫번째 vmnet1 인터페이스만 설정(vmnic0)
+esxi_1 : 192.168.1.11 (esxi_1.test.pri)
+esxi_2 : 192.168.1.12 (esxi_2.test.pri)
+
+콘솔화면에서 F2 키로 진입 -> root/test123 으로 로그인
+-> Configure management -> Network adapter 에서 vmnic0을 확인한 다음 수정하지 말고, IP Configuration 으로 이동 -> dynamic  으로 되어 있는 것 말고 그 아래에 있는 static 으로 이동한 다음 "space bar" 를 누르고 IP, Subnet 마스크 입력한다. -> DNS Configuration 으로 이동 -> hostname 만 변경한다(esxi1.test.pri, esx2.test.pri)-> esc 키를 누르면 저장후 빠져나갈 것인지를 물어본다. 이때 Y 를 입력하면 끝!!
+
+3. vCenter 에서 두 호스트(esxi1, esxi2) 를 등록한다.
+
+
+
+4. vCenter 에서 NFS 서버를 등록한다.
+
+
+
+
+스위치 구분
+1. 표준 스위치  : 각 호스트별로 사용하는 독립적인 가상 스위치 
+2. 분배 스위치  : 클러스터 전체에 걸쳐 사용하는 가상의 클러스터 가상 스위치(overlay network)
+
+
+vMotion 
+- VM vMotion  :  가상머신 자체의 컴퓨팅 자원을 이동 시키는 것
+- Storage vMotion :  가상머신의 디스크를 이동시키는 것
+vMotion 은 클러스터환경이 아니더라도 동작한다. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

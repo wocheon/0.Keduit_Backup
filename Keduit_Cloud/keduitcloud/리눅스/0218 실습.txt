@@ -1,0 +1,311 @@
+﻿사용자 생성 관리
+
+사용자 생성 : useradd [option] [argument] 사용자명
+사용자 수정 : usermod [option] [argument] 사용자명
+사용자 삭제 : userdel -r 사용자명
+
+생성옵션
+-u : uid를 직접 설정
+-g : gid를 직접 설정하되 존재하는 그룹이어야 함.
+-c : 코멘트를 작성가능
+-d : home 디렉토리의 위치나 이름을 지정할 수 있음.
+-b : 베이스 홈 변경
+-s : 로그인 쉘을 지정할 수 있음.
+-G : 보조그룹 지정
+
+usermod 추가 옵션
+-a : 보조그룹을 추가 (-G와 함께 사용)
+-m : 홈디렉토리의 변경할때 사용(-d와 함께 사용)
+-l : 계정명 변경
+-L : 계정 잠금
+-U : 계정 잠금 해제
+
+
+사용자 생성 실습
+
+스냅샷을 초기설정으로 바꾸고
+
+사용자   uid   gid  보조그룹     comment  home          shell   
+user01  1001  10                      /home/user01  /bin/bash
+
+useradd -g 10 user01
+
+user02  2000  2000 wheel      user    /home/user    /bin/sh
+
+useradd -u 2000 -G wheel -c user -d /home/user -s /bin/sh user02
+
+user03  3000  1000                    /home/user03  /bin/csh
+
+useradd -u 3000 -g 1000 -s /bin/csh user03
+
+user04  4000  4000 10	      guser   /home/user04  /bin/bash
+
+useradd -u 4000 -c guser user04
+
+default 값 수정
+
+/bin/bash => /bin/sh 로 수정 => vi 편집기로
+
+vi /etc/default/useradd
+
+/home    => /home1 로 수정 => 명령어를 통해서 
+
+useradd -D -b /home1
+
+useradd -D
+
+testuser01 생성해서 확인해볼 것
+
+useradd testuser01
+
+tail -1 /etc/passwd
+
+사용자 수정 실습
+
+사용자   uid   gid  보조그룹     comment  home          shell   
+user01  1001  1000 wheel               /home/user01 /bin/bash
+
+usermod -g 1000 -G wheel user01
+
+user02  1002  2000 wheel,adm  user02   /home/user02 /bin/bash
+
+usermod -u 1002 -aG adm -c "user02" -md /home/user02 -s /bin/bash user02
+
+user03  1003  1000 10                  /home/user03 /bin/bash
+
+usermod -u 3000 -G 10 -s /bin/bash user03
+
+user04  1004  4000 10, 2000   guser    /home/user04 /bin/bash
+
+usermod -u 1004 -aG 2000 user04
+
+testuser01 수정
+testuer01 => user05  
+/home1/testuer01 => /home/user05
+/bin/sh => /bin/bash
+
+usermod -l user05 -md /home/user05 -s /bin/bash testuser01
+
+그룹 관리
+
+groupadd [option] 그룹명
+groupmod [option] 그룹명
+groupdel 그룹명
+
+group 실습
+
+id user01 => uid=1001(user01) gid=1001(user01)
+
+groupadd 1001 user01
+usermod -g 1001 user01
+
+id user02 => uid=1002(user02) gid=1002(user02)
+
+groupmod -g 1002 user02
+
+id user03 => uid=1003(user03) gid=1003(user03)
+
+groupadd 1003 user03
+usermod -g 1003 user03
+
+id user04 => uid=1004(user04) gid=1004(user04)
+
+groupmod -g 1004 user04
+
+암호속성 변경
+
+user01 의 
+minum date 10
+maximum date 100
+warning date 10
+
+chage -m 10 -M 100 -W 10 user01
+
+user02이 접속할때 암호변경을 하도록 설정
+
+chage -d 0 user02
+
+user01 의 홈디렉토리를 삭제하고 그래픽 모드에서 로그인이 가능하도록 만드시오.
+
+rm -rf /home/user01
+
+cp -r /etc/skel /home/user01
+chown -R user01:user01 /home/user01
+chmod 700 /home/user01
+
+
+----------------------------------------
+
+
+           file    directory
+setuid	    o       x
+
+setgid      o       o
+
+sticky bit  x       o
+
+(실행권한이 있다는 가정하에)
+
+          심볼릭 방식        8진수 방식
+
+setuid     chmod u+s 파일명   chmod +4000     파일명
+setgid     chmod g+s 파일명   chmod +2000   파일명
+sticky bit chmod o+t 파일명   chmod +1000    파일명
+
+확장권한 실습
+
+ptest 디렉토리 생성
+
+/ptest에 모든 권한을 rwx로 주고 setgid 권한도 줄 것
+
+chmod a=rwx,g+s /ptest
+
+or
+
+chmod 2777 /ptest
+
+user01로 사용자 전환
+
+su - user01
+
+/ptest 안에 파일 file01 과 디렉토리 dir01 생성 
+
+mkdir /ptest/dir01
+touch /ptest/file01
+
+file01과 dir01 소유권 확인 및 dir01의 퍼미션 확인
+
+ls -l /ptest
+
+file01 : 소유그룹이 root
+dir01 : 소유그룹이 root setgid가 상속되어 있는 것을 확인할 수 있음.
+
+root로 사용자 전환
+
+exit
+
+dir01의 소유권을 user01로 바꾸고 소유그룹을 student로 변경 하고 sticky bit 권한과 모든 사용자에게 rwx 권한을 줄것 
+
+groupadd -g 5000 student
+chown user01:student dir01
+
+chmod a=rwx,o+t dir01
+
+chmod 1777 dir01
+
+file01에 setuid 권한을 줄 것
+
+chmod u+s file01
+
+or
+
+chmod +4000 file01
+
+user02로 사용자 전환
+
+su user02
+
+./dir01 안에 파일 file02와 디렉토리 dir02 생성
+
+mkdir dir01/dir02
+touch dir01/file02
+
+file02 와 dir02의 소유권 확인
+
+file02 : 소유그룹 student
+dir02 : 소유그룹 student setgid 상속
+
+user03 사용자 생성
+
+su user03
+
+user03로 사용자 전환 /ptest/dir01/file02 삭제 해볼 것
+
+rm dir01/file02
+
+에러 : stiky bit인해서 삭제 불가
+
+user03로 사용자 전환 /ptest/file01 삭제 해볼 것
+
+rm file01
+
+삭제 성공
+
+setgid 권한이 주어진 파일이나 디렉토리를 검색하는 방법은?
+
+find / -perm -2000 2> /dev/null
+
+or
+
+ls -lR / 2> /dev/null | grep '^......s.... ' 
+
+-------------------------------------------------
+
+acl (접근제어목록)
+
+getfacl : acl 설정 확인 명령어
+setfacl : acl 설정 명령어
+
+setfacl 옵션
+
+-m : acl 설정 
+-x : acl 설정 삭제
+-b : acl 무효화
+
+-m 옵션 사용방법
+
+acl에 특정 사용자 추가시 - u:사용자명:권한
+acl에 특정 그룹 추가시   - g:그룹명:권한
+acl mask 값 설정시       - m::권한
+
+실습
+
+aclgroup 그룹 생성
+
+groupadd -g 3000 aclgroup
+
+user02를 aclgroup 구성원으로 넣을 것(기본 그룹으로 바꾸는 것 아님)
+
+usermod -G aclgroup user02
+
+/ptest 모든 내용 삭제하고 777로 권한변경
+
+rm -rf /ptest/*
+chmod a=rwx,g-s /ptest
+
+/ptest 에 user03 은 접근 할 수 없도록 설정
+
+setfacl -m u:user03:0 /ptest
+
+/ptest 에 파일 aclfile01 과 디렉토리 acldir01 생성
+
+mkdir /ptest/acldir01
+touch /ptest/aclfile01
+
+aclfile01은 user01 만이 읽기, 쓰기, 실행 가능하도록 설정하고 나머지는 읽기, 쓰기만 실행가능하도록 
+
+chmod 666 aclfile01
+setfacl -m u:user01:7 aclfile01 
+
+acldir01는 aclgroup 만이 읽기 쓰기가능하고 나머지는 읽기만 가능하도록 설정 
+
+chmod 555 acldir01
+setfacl -m g:aclgroup:7 acldir01
+
+---------------------
+
+setfacl -m g:aclgroup:7 acldir01
+chmod 555 acldir01
+
+을 실행했다면 어떤일이 벌어질까요?
+
+mask 읽고 실행만 가능한 상태가 되기 때문에 aclgroup도 읽고 실행만 가능한 상태가 됨.
+
+수정사항
+
+setfacl -m m:7 acldir01 을 실행하면 됨.
+ 
+-------------------------------------------------------------
+
+
+

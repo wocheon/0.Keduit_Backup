@@ -1,0 +1,907 @@
+ubuntu설치
+
+cpu 1,2
+ram 2
+
+minimal install
+
+computername : docker01
+yourname : user1 
+password : user1
+
+cp /media/user1/VMware\ Tools/VMware. xxxx .tar ./
+
+vmware-tools-distrib/vmware-install.pl
+
+ip 211.183.3.101/24
+gw 211.183.3.2
+dns 8.8.8.8
+
+dockert책 33페이지를 보고 도커를 설치하기
+
+
+su root 로 가서 다음과 같이 입력
+
+echo "user1 ALL=NOPASSWD: ALL" > /etc/sudoers
+root@docker01:~# usermod -aG docker user1
+
+hypervisor 를 이용한 가상머신 | 인스턴스
+-격리도가 매우 높다.
+-각각의 커널을 갖는다.
+-각각의 분리된 자원을 사용한다.
+-성능이 저하된다(많은 경우 30%정도의 성능저하 발생)
+
+docker 
+-격리도가 높다
+-host os의 커널에 직접 접속하므로 성능저하가 거의 없다.
+(app의 성능이 떨어지지않는다)
+-분리된 자원사용이 가능하도록 정책을 세울수 있다.
+(일종의 quota를 적용하여 사용할 수있는 리소스 제한)
+-성능 저하가 거의 없다.
+
+bare metal VS hypervisor VS Docker 
+    1.0         0.7            0.97 (메모리는 1.01)
+
+docker container run --name websrv1 -d -p 8001:80 nginx
+docker container run --name websrv2 -d -p 8002:80 nginx
+
+firefox에서 localhost:8001, 8002로 접속하여 nginx확인 
+
+docker container run --name websrv1 -d -p 8001:80 nginx
+1.로컬저장소에서 ngnix이미지를 찾는다
+2.없다면 dockerhub에 접속하여 nginx 이미지를 다운로드
+(저장은 로컬 저장소에 저장됨)
+3.도커 데몬은 로컬에 저장된 nginx 이미지를 이용하여
+컨테이너를 생성한다. 생성시 컨테이너의 이름은
+websrv1 이되고 동작중인 컨테이너는 백그라운드에서 동작
+또한 컨테이너 자신의 80포트를 호스트의 80001번 포트와 매핑한다.
+
+
+docker ps --all
+docker container ls
+>현재 동작중인 컨테이너 확인
+
+docker container start websrv1
+docker container stop websrv1
+> 컨테이너 실행 및 중지
+
+docker container run - --name centos01 --hostname centos centos:7 /bin/bash
+uname -a > ubuntu의 커널을 사용하는 것을 알수있음
+echo $HOSTNAME >hostname이 centos로 되어있는 것을 알수있음
+
+ctrl +p ctrl +q : 컨테이너에서 빠져나가기
+
+docker container inspect centos01
+>docker 이미지는 key:value 형태로 되어있다
+
+docker container attach centos01
+> 해당 컨테이너로 접속한다.
+
+docker image ls
+>
+
+docker image nginx
+
+docker search MariaDB
+
+docker image 만들기
+-------------------------------------
+mkdir 0420
+cd 0420
+
+vi Dockerfile 
+FROM centos:7
+RUN yum -y install httpd php php-mysql
+ADD index.html /var/www/html/index.html
+EXPOSE 80
+CMD /usr/sbin/httpd/ -D FOREGROUND
+
+
+docker build -t web:0.1 .
+
+docker image ls
+
+docker container run -d -p 8081:80 web:0.1
+docker container run -d -p 8082:80 web:0.1
+
+Quiz web:0.2 버전 만들기
+
+    처음 접속시 localhost:8083 으로 접속
+    
+    이름 : _____
+        확인
+
+    확인 누르면 화면에서 
+    ___님 반갑습니다 출력 
+
+--------------------------------------------
+vi Dockerfile 
+FROM centos:7
+RUN yum -y install httpd php php-mysql
+ADD index.html /var/www/html/index.html
+ADD a1.php /var/www/html/a1.php
+EXPOSE 80
+CMD /usr/sbin/httpd/ -D FOREGROUND
+
+
+docker build -t web:0.2 .
+
+docker image ls
+
+docker container run -d -p 8083:80 web:0.2
+
+
+도커 : 자신의 커널을 사용하는 것이 아니라 컨테이너 형식으로 애플리케이션을 동작 시킨다.
+커널은 호스트의 커널을 사용하므로 하이퍼바이저를 이용한 추상화 단계가 없으므로 
+성능 저하가 거의 발생하지않는다.
+또한 각 애플리케이션을 컨테이너로 구분하므로 격리도가 높다.
+
+이를 이용하여 RDS와 비슷한 서비스를 만들 수도 있다.
+
+컨테이너 서비스는 도커가 유일하지는않다.
+cgroup,namespace 라는 리눅스의 기능을 이용하여 구현한 것이다.
+
+cgroup > 자원사용제한
+namespace > 격리
+
+도커 라이프 사이클 관리 (생성> 수정 >삭제)
+컨테이너를 만들기위해서는 이미지가 필요하다
+이미지는 사설,공인(도커허브), 로컬저장소를 이용하여 저장된다.
+
+이미지 찾기 docker search ubuntu:18.04
+만약 tag를 부착하지않으면 최신버전의 우분투를 보여준다.
+
+이미지 다운로드시 로컬에 해당이미지가 있으면 추가 다운로드 하지않는다.
+
+docker image rm web:0.1 -f
+이미지가 사용중이더라도 강제로 삭제
+
+-docker container 생성 명령어
+create : 컨테이너 생성, 생성후 중지됨 > docker container start IDorname
+run : 컨테이너 생성 , 생성후 자동으로 실행됨
+
+-docker run 옵션 목록
+docker container run ubuntu /bin/echo "hello world"
+docker container run --name test01 --hostname test001 -it centos:7 /bin/bash
+--name : 지정하지않으면 자동으로 생성됨
+--hostname : 지정하지않으면 자동으로 생성됨
+-it : 해당 컨테이너로 연결한다. (가상터미널을 이용함)
+-d : 백그라운드에서 동작한다 (주로 서비스를 제공하는 컨테이너들에게 지정하는 옵션)
+-p : 호스트의 포트와 컨테이너의 포트를 매핑 
+ex) 8001:80  > 8001은 호스트의 포트, 정적 PAT구성
+-v (volume) : 호스트의 특정공간과 컨테이너의 특정디렉토리(디스크)를 마운트
+              호스트 디스크의 일정 공간을 컨테이너의 특정 디스크와 연결한다.
+              다른 컨테이너의 디렉토리를 마운트 할수있다.
+
+컨테이너에 적용된 내용은 영구 저장되지는 않는다. 컨테이너 삭제시 해당 데이터도
+함께 삭제되므로 중요한 데이터는 백업을 하거나 -v옵션을 통해 호스트의 특정지점에
+디스크를 연결하여 사용하는 방법을 적용해야한다.
+
+
+-컨테이너 삭제하기
+
+docker contianer ls -a (-a는 동작중인 컨테이너 뿐아니라 모든 컨테이너를 보여줌 )
+
+동작중인 컨테이너는 삭제가 불가능하므로 종료뒤 삭제 혹은 강제 삭제해야함
+
+-도커 이미지 태그 변경하기
+docker image tag centos:7 web:1.0
+docker image tag web:1.0 user1/ciw0707-centos7:0.1
+
+
+docker image ls 
+centos                  7         8652b9f0cb4c   5 months ago   204MB
+web                     1.0       8652b9f0cb4c   5 months ago   204MB
+user1/ciw0707-centos7   0.1       8652b9f0cb4c   5 months ago   204MB
+
+>3개 모두 같은 이미지이며 이름만 다르게 설정됨(ID값이 동일함)
+
+-w 옵션
+작업 디렉토리 지정
+
+만약 컨테이너 생성시 -w=/test 라고 했다면 생성된 컨테이너에는 자동으로 /test라는 디렉토리가 생성되고
+연결하면 바로 해당 디렉토리로 이동된 상태로 접속
+
+-e : 시스템 환경변수 설정(전역변수)
+ex) -e WORK=/test  컨테이너 내에서 echo $WORK > /test 
+
+설정해야할 변수가 많은 경우 파일에 변수를 선언하고 이를 옵션으로 불러오는 방법을 사용할 수 있다.
+--env-file=파일명
+
+도커네트워크
+-bridge : 가상의 스위치를 만든다 해당스위치는 자동으로 NAT된다.
+-host : 호스트의 IP주소를  컨테이너와 공유하여 사용한다.
+-null : 네트워크 없음
+-overlay : 클러스터로 연결된 모든 서버에 동일한 하나의 네트워크가 생성, 지역에 상관없이 모두 연결된다.
+
+
+docker container run --name mariadb01 -d -e MYSQL_ROOT_PASSWORD=test123 -e MYSQL_DATABASE=sqldb mariadb/server:10.2
+docker container ls | grep mariadb01
+docker container inspect mariadb01 | grep IPA
+
+
+-Dockerfile 작성 요령
+퍄
+1.FROM : 베이스 이미지를 지정하는 것으로 새로운 이미지의 기본베이스가 된다
+    FROM다음에 베이스 이미지를 지정하고 로컬에 없다면 도커 허브에서 다운로드한다.
+
+2.RUN : 이미지내에 필요한 패키지 등을 설치하기위한 명령의 실행이 가능하도록 해준다.
+        도커 파일 내에서 여러번 사용할 수 있다.
+        ex) RUN yum install -y httpd php php-mysql git 
+
+3.EXPOSE  생성될 컨테이너에서 오픈할 포트를 지정한다
+        ex) 웹서버 사용시 
+            EXPOSE 80 or EXPOSE 443
+
+4.CMD : 이미지에서가 아니라 컨테이너가 실행된 다음 컨테이너 내에서 실행할 명령어를 작성
+        일반적으로 CMD는 가장아래에 작성한다.
+        Dockerfile에서 한번만 사용할수있다.(스크립트도 사용가능)
+        ex) 컨테이너 실행시 웹서버를 실행하는 경우 
+        httpd 또는 nginx를 실행한다.
+
+ ENTRYPOINT : CMD와 동일하게 컨테이너 실행시 전달할 명령어를 작성한다.
+             이 또한 파일내에서 1번만 사용할수있음    
+
+둘의 차이점 : ENTRYPOINT는 컨테이너 실행시 무조건 실행
+             CMD는 컨테이너 실행시 docker run에서 동일 옵션이 있을 경우 
+             실행되지않음 
+
+             만약 컨테이너 실행시 웹서버 하나만 띄우는 것이 아닌
+             다양한 명령 실행이 필요하다면 스크립트를 사용
+             (스크립트를 사용하려면 먼저 copy로 전달해주어야함)
+
+5.COPY : 이미지에 호스트상의 파일이나 디렉토리를 복사하는 경우 사용
+         ADD(COPY) 와 비슷한기능을 수행       
+
+6.env : 환경변수($HOSTNAME) 선언이 가능 
+        작성 방법에는 두가지 방법이 존재하고있는
+        1. 여러줄로 작성하기
+            ENV MYNAME "user1"
+            ENV MYORDER "coffe"
+        2. 한줄로 작성하기 
+            ENV MYNAME="user1" MYORDER="coffe"
+
+7. ADD : COPY와 동일한 기능을 수행하며, 추가적으로 웹상의 파일을 불러올수있다.
+         또한 패키지 파일이 있다면 이를 압축 해제하여 디렉토리에 부착한다.
+   ex) 
+   COPY test.tar /var/www/html > 컨테이너에서 ls /var/www/html/
+                                                        test.tar
+    ADD test.tar /var/www/html > 컨테이너에서 ls /var/www/html/
+                                                        a.jpg TESTDIR
+
+8.VLOUME : 이미지에 볼륨을 할당하고자 할때 사용
+        VLOUME["/var/log"]
+        VLOUME /var/log
+
+
+QUIZ.centos를 다운로드하여 httpd php php-mysql git wget을 설치하고
+80번포트는 오픈하라. 로컬에있는 index.html파일을 이미지의 /var/www/html에 붙여넣기하라
+
+또한 생성된 컨테이너는 웹서비스를 시작할수 있어야한다.
+
+
+-이미지 만들기 
+Dockerfile을 이용하여 이미지를 생성 > 기본적으로 로컬저장소에 저장
+> 사설,퍼블릭 저장소에 업로드하여 다른 사용자와 공유하여 사용이 가능
+
+컨테이너의 자료는 영구적인 자료가 아님 
+그러므로 이를 백업할수 있는 기술이 필요
+>volume을 사용하여 해결이가능
+
+-컨테이너의 파일을 백업하는 방법 
+1.컨테이너의 특정 디렉토리를 호스트의 특정 디렉토리와 마운트한다.
+2.컨테이너간 디렉토리 공유, 마운트 ( 잘사용하지않음)
+3. 도커 볼륨을 사용한다. > iSCSI
+
+dockerfile에서는 옵션으로 vol을 사용하여 볼륨 사용이 가능한데
+이때 도커 볼륨만 지원
+
+호스트에 가상의 디렉토리를 만들고 이를 컨테이너의 특정디렉토리로 사용함
+
+
+docker container run -d --name wordpressdb -e MYSQL_ROOT_PASSWORD=test123 -e MYSQL_DATABASE=wordpress -v /home/user1/0422/wordpress_db:/var/lib/mysql mysql:5.7
+docker container run -d -e WORDPRESS_DB_PASSWORD=test123 --name wordpress -p 8001:80 --link wordpressdb:mysql wordpress
+
+
+-도커 볼륨 만들기 
+docker volume create --name testvol
+docker volume ls
+
+ docker run -it --name ubuntu01 -v testvol:/root ubuntu /bin/bash 
+ > testvol 을 /root에 마운트하고 /bin/bash로 접속
+
+/root로 이동하여 파일 하나 만들고 빠져나와서 컨테이너 삭제후
+볼륨을 확인해보면 남아있는걸 알수있음
+
+두번째 컨테이너에 볼륨을 다시 붙혀서 사용하면 만들어진 파일이 
+남아있는 것을 알수있음 
+
+docker volume inspect testvol
+> 도커 볼륨의 상세정보 확인, 마운트 포인트도 확인가능
+해당 마운트 포인트에가면 볼륨내의 자료를 확인 가능
+ex)  cat /var/lib/docker/volumes/testvol/_data/voltest.txt 
+
+
+onbuild : TA, PM or PL 이 진행해야함
+
+-vim Dockerfile
+FROM centos:7
+RUN yum -y update
+RUN yum -y install httpd
+EXPOSE 80
+ONBUILD ADD website.tar /var/www/html
+CMD /usr/sbin/httpd -D FOREGROUND
+
+
+WORKDIR : 도커파일내에서 작업위치를 지정해준다
+경로 이동시 사용하는 방법
+
+WORKDIR /var/www/html
+RUN touch index.html  > /var/www/html 에서 index.html을 만들고 /etc로 이동
+WORKDIR /etc/ 
+
+
+
+mariadb01 ip ad 172.17.0.5
+
+
+
+컨테이너의 구분
+1. OS용 컨테이너 : base이미지로 활용하는 경우가 많음
+
+2. application용 컨테이너 : nginx, mariadb,mysql,httpd
+
+
+-centos 7으로 컨테이너를 만들고 bash쉘로 접속
+docker container run - centos:7 /bin/bash
+
+컨트롤 pq로나오면 백그라운드에서 동작하는상태로 
+컨테이너에서 빠져나온다
+
+빠져나와서 
+docker container exec 7f28dccae87a ping -c 4 www.google.com
+으로 컨테이너에서 ping동작 확인
+
+docker container exec 7f28dccae87a cat /etc/hostname
+호스트네임 확인
+
+docker container rename 7f28dccae87a test
+컨테이너 이름을 변경
+
+docker container stat test
+컨테이너의 실시간 상태를 확인하기 
+
+docker container run -d -p 8831:80 -v /root/nginx:/usr/share/nginx/html nginx
+vim /root/nginx/index.html
+
+----------------저장소 (이미지 보관장소)-----------------------
+
+로컬저장소 : 자신의 컴퓨터내에있는 저장소, 자신만 사용가능
+
+퍼블릭(공인) 저장소 : 도커허브같이 공개된 장소에 보관하는것을 의미한다
+다른 모든 사람들이 검색, 다운로드하여 사용가능 
+
+프라이빗(사설) 저장소 : 제한된 인원만 접근 가능한 저장소
+예를 들어 도커 내부에 유료서비스를 이용하여
+특정 계정에 대해서만 접근 가능하도록 하는것
+AWS,GCP의 사설 저장소를 이용하는 경우 해당 프로젝트내에 참여중인
+사람만 다운로드 가능 
+도커 레지스트리를 이용하여 회사 내부에 있는 서버에 사설 저장소를 
+구축하면 회사 내 직원들만 접근이 가능
+
+[실습]
+Quiz. 
+- 로컬 저장소에 있는 이미지를 사설 저장소에 push 하고, 로컬 저장소 이미지는 삭제하라.
+- 사설 저장소에서 이미지를 다운로드하여 이를 이용한 nginx 서비스를 배포하라!!!
+
+
+step1. Dockerfile 로 nginx 서비스 가능한 이미지 생성하기
+step2. registry 다운로드하여 사설 저장소 구축
+step3. 기존에 만든 이미지를 사설저장소에 올릴 수 있는 이미지로 tag  를 변경한다.
+step4. 사설저장소용 이미지는 사설 저장소에 push 하고 로컬 저장소에 있던 이미지는 삭제한다.
+step5. 사설저장소로 부터 이미지를 다운로드하여 nginx 서비스를 배포한다.
+
+
+ 주의!!! 
+  nginx 이미지로 컨테이너 생성시 웹서비스를 위한  기본 홈디렉토리 : /usr/share/nginx/html <- 컴파일설치
+  ubuntu 이미지를 다운로드하여 RUN 으로 nginx 설치시 기본 디렉토리 : /var/www/html <- apt-get 설치
+
+
+1.(로컬) 사설 저장소 구축하기
+docker image pull registry
+docker container run  -d -p 5000:5000 --name mypregi registry
+
+2.Dockerfile 작성하여 이미지를 생성하기
+vim Dockerfile 
+---------------------------------------------
+FROM nginx
+COPY 0422/index.html /usr/share/nginx/html
+--------------------------------------------
+
+docker build -t test:nginx .
+
+3.사설 저장소에 이미지 업로드
+docker image tag test:nginx localhost:5000/test:nginx
+docker image push localhost:5000/test:nginx
+
+4.로컬저장소에있는 이미지를 삭제후에 사설저장소에서 이미지 불러오기
+docker image rm test:nginx
+docker image rm localhost:5000/test:nginx
+docker image pull localhost:5000/test:nginx 
+
+docker run -d -p 8009:80 localhost:5000/test:nginx 
+
+
+
+도커 컴포즈 설치 ---------
+1. curl  -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+2. chmod +x /usr/local/bin/docker-compose
+3. docker-compose -v
+
+yml 또는 yaml -> 야믈 파일 
+
+- 도커 컴포즈는 야믈파일에 작성된 환경 내용을 읽어 해당 내용에서 원하는 대로 컨테이너, 컨테이너간 연결, 볼륨, 네트워크 등을 만들어 준다. 
+- key: value 형태로 모든 내용을 작성한다
+- 동일 환경을 다시 만들거나 이를 확장하거나 약간의 수정이 있을 경우 매우 편리하게 사용할 수 있다. 
+
+------------------- 실습 docker-compose.yml 파일 ------------------------------
+version: '3.1'
+
+services:
+
+  wordpress:
+    image: wordpress    #base 이미지
+    restart: always     #docker 데몬이 재부팅되더라도 항상 자동실행
+    ports:
+      - 8080:80         #호스트의 8080포트를 서비스의 80포트와 연결
+    environment:        #-e옵션과 동일
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: exampleuser
+      WORDPRESS_DB_PASSWORD: examplepass
+      WORDPRESS_DB_NAME: exampledb
+    volumes:
+      - wordpress:/var/www/html #로컬에 wordpress라는 볼륨을 만들어 컨테이너의 /var/www/html에 붙임
+    depends_on:
+      - db                      #실행순서를 결정한다. (db가 먼저 실행되면 wordpress가 실행)
+                                #(DB가 완전히 안정적으로 동작 뒤 실행하는 것은 아님, 그냥 실행순서만 결정)
+
+  db:
+    image: mysql:5.7        
+    restart: always
+    environment:
+      MYSQL_DATABASE: exampledb
+      MYSQL_USER: exampleuser
+      MYSQL_PASSWORD: examplepass
+      MYSQL_ROOT_PASSWORD: test123
+    volumes:
+      - db:/var/lib/mysql    #db라는 볼륨을 만들어 붙임
+
+volumes:
+  wordpress:
+  db:
+  #둘사이의 연결은 링크가 필요없이 자동으로 연결된다.
+------------------------------------------------------------------------
+작성 완료후
+docker-compose up -d
+
+wordpress 와 mysql 컨테이너가 설치됨을 알수있음
+
+*docker network/volume 확인
+docker volume ls 
+docker network ls
+
+docker volume inspect 이름
+docker network inspect 이름
+
+
+-yml파일의 구분
+
+1.버전지정 : docker compose의 버전 지정 
+2.서비스 지정 : 컨테이너의 스펙 
+3.볼륨 지정 컨테이너가 사용할 볼륨 지정 (옵션)
+4.네트워크 지정 : 컨테이너 연결을위한 네트워크를 지정 (옵션)
+
+줄 맞춤이 매우 중요하며
+tab키 인식 불가능하므로 스페이스바를 이용해야한다.
+일반적으로 2,4,6 혹은 3,6,9 단위로 띄워서 작성한다
+
+도커 compe 파일 작성시 유의 사항
+메인 작성사항
+1.version 
+2.services : 컨테이너 구성, 같은 기능을 하는 서비스끼리는 라인맞추기 중요 
+옵션을 하나밖에 사용할수없는 경우에는 대쉬(-)를 사용하지않고
+콜론다음에 한칸 띄워서 사용함 
+
+환경변수 작성 방법은 두가지로 사용가능
+1. WORDPRESS_DB_HOST: db
+2. - WORDPRESS_DB_HOST=db
+
+3.volume
+4.networks
+네트워크를 작성하지않으면 디폴트네트워크를 만들어줌
+루트가 지정하지않고 실행하면  root_default 
+user1이 지정하지않고 실행하면 user1_default 로 만들어짐
+두 네트워크는 서로 독립적으로 존재한다.
+
+만약 오버레이네트워크를 구성하는경우 꼭 명시해 주어야한다.
+
+
+docker-compose ps : compose로 실행한 컨테이너를 확인 가능함 
+(docker container ls 는 run + compose 모두 확인)
+
+docker-compose stop : 정상 중지 시킴
+
+docker-compose down : 강제 종료후 삭제 
+
+docker-compose up -d --scale wordpress=3 --scale db=2
+워드 프레스 3개 db2개 띄워라  > wordpress는 1개만 동작함 
+
+yml파일에서 
+ports:
+      - 8080:80  를  8080-8088:80 으로 수정 (범위를 지정함)
+      > 결국 전부 8080으로만 접속되게 된다. (볼륨에 처음 설치했던 설정이 남아있기때문임)
+
+결국 여러대의 워드프레스 서버를 위해서는 자체 호스트 서버를 늘려야만 한다.
+> 이를 자동으로 설정하는것이 auto-sclaing이다.
+
+
+-클라우드(AWS)의 완전관리형 서비스
+별도의 서버, 운영체제 과정없이 서비스 신청하면
+즉시사용할수 있는 형태
+
+OS서비스자원관리는  사용자관리가 아닌 공급자가처리 
+
+
+docker compose파일에서 dockerfile을 사용하는방법
+ex) 
+services:
+ webserver: 
+    build: .
+
+>docker build . 를 실행시킴     
+
+클러스터링 : 클러스터를 구성하게되면 자원공유가 가능해진다.
+일종의 풀에 자원을 넣고 공유하는 방식이다.
+거리상 떨어져있어도 구성가능
+
+
+[실습]-클러스터링 구성하기 
+docker-compose down
+systemctl restart Docker
+docker system prune
+
+init0 
+
+풀클론으로 4개를 생성하기
+
+docker01 manager manager01 211.183.3.100
+docker02 worker worker01  211.183.3.101
+docker03 worker worker02  211.183.3.102
+docker04 worker worker03  211.183.3.103
+
+모든 노드에는 아래의 내용을 /etc/hosts에 등록한다.
+
+211.183.3.100 manager01
+211.183.3.101 worker01 
+211.183.3.102 worker02 
+211.183.3.103 worker03 
+
+모든 노드는 multi-user.target(CLI)로 부팅되도록 설정하고
+SSH로 연결하기
+
+apt-get install ssh; systemctl enable sshd ; systemctl set-default multi-user.tartget ; reboot
+
+*manager 노드 : 클러스터 내부에서 작업을 주도하는 서버를 의미하며
+클러스터 내부에 1대이상 존재해야한다.
+기본적으로 worker의 기능을 겸업한다.
+
+worker 노드 : manager의 작업지시를 받아서 이를 수행하는 서버
+
+manager와 worker는 반드시 동일 네트워크상에 배치되어야하는 것은 아니며
+물리적으로 떨어져있는 상태에서도 클러스터링이 가능하다.
+
+manager를 하나만 사용하는 경우 만약 manager가 다운되면 작업지시가 불가능하므로
+보통은 이중화를 통해 manager를 2대이상 배치한다.
+
+user1@manager01:~$ docker swarm init --advertise-addr 211.183.3.100
+Swarm initialized: current node (t53349nsr5c6ayljryesrlmdb) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-4uttvii6wqyz5zosctj4scixq71lsdl3eqrgtwldeohprmr70h-1znj9tezgcbih8f6e47nf0m9x 211.183.3.100:2377 
+#이줄을 복사해서 다른 노드에서 실행하기
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+docker node ls > 노드간 연결상태 확인
+
+docker service create --name web --replicas 4 -p 80:80 nginx
+> 4개의 노드에서 각각 nginx 컨테이너로 접속하기
+
+docker service ps web > swarm으로 실행된 컨테이너 확인
+
+docker service rm web > swarm으로 실행된 컨테이너 모두 내리기
+
+docker service create --name web --constraint 'node.role != manager'  --replicas 2 -p 80:80 nginx
+> 매니저를 제외한 2개의 노드에서 ngix컨테이너를 배포시키기
+
+*2개를 배포하여도 다른 곳에서 접근이 가능하다.
+>클러스터를 구성하게되면 자동으로 오버레이 네트워크가 구성이된다.
+그러므로 다른곳에서 접속이 가능해지는것임
+
+docker service scale web=4
+> 매니저에서는 배포하지않도록 설정했으므로 worker01에서 두개가 돌아감
+
+
+docker node update --availability drain worker01
+> 노드 하나를 중지시킴
+
+docker service ps web로 확인해보면 3번에서 새로운 컨테이너를 만들어
+동작시키고있는것을 확인 가능
+
+docker service create --name web --constraint 'node.role != manager' --mode global -p 80:80 nginx
+>매니저를 제외한 나머지 모든 노드에 공평하게 하나씩 컨테이너를 배포한다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+토큰 발행 이후 manager 를 2개로 늘리고 싶다면??
+1. 첫번째 방법
+user1@manager01:~$ docker swarm init --advertise-addr 211.183.3.100  <-- 토큰발행하고 이를 이용하여 워커들이 스웜 클러스터에 조인한다. 
+Swarm initialized: current node (msfctow4b3bn44r6cc6ezqe1f) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-5irkus71dikt64psicehk7s9llthtaik67a7g463eloknjro8z-akz0saaujn5a25i1m4s3q1mrh 211.183.3.100:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+user1@manager01:~$ docker swarm join-token manager    <--- 아래의 내용을 다른 노드에서 실행하면 매니저로 가입된다. 
+To add a manager to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-5irkus71dikt64psicehk7s9llthtaik67a7g463eloknjro8z-3vny7i8bdldi2d51161ntd3j9 211.183.3.100:2377
+
+user1@manager01:~$
+
+2. 두번째 방법 
+매니저에서 아래 내용을 실행한다.
+
+docker node promote worker01 <-- worker01 을 worker 에서 manager 로 변경시킨다. 
+
+
+#############컨테이너 배포 방법 정리#######################
+
+docker container run 
+각 컨테이너별 실행
+두개이상 연결
+동일 설정을 여러번해야하는 경우 부적함
+
+docker-compose
+yml파일에 필요한 서비스 네트워크 볼륨등을 작성하여
+한번에 서비스를 배포한다.
+
+모든 설정이 한대위에서만 구성된다.
+
+docker-swarm cluster
+
+
+
+----------------------------------------------------------------------------------
+도커 클러스터가 구성되면 ingress네트워크가 새로 생성된다.
+(docker network ls 로 확인이가능 )
+NAME              DRIVER    SCOPE
+ingress           overlay   swarm
+
+롤링업데이트 : 동작중인 컨테이너의 이미지를 새로운이미지로 업데이트 시키는 것으로
+서비스의 중단없이 신규 서비스를 배포할 수있다.
+
+vim Dockerfile
+
+FROM centos:7
+RUN yum -y install httpd
+ADD index.html /var/www/html
+CMD /usr/sbin/httpd -D FOREGROUND
+
+index.html에 vr1표시
+docker build -t myweb:1.0 .
+docker service create --name web --mode global --constraint 'node.role == worker' -p 80:                       80 nginx
+
+
+index.html에 vr2표시
+docker build -t myweb:2.0 .
+docker service update --image myweb:2.0 myweb
+docker service rollback myweb
+
+
+-라벨을 추가하여 특정 노드에만 서비스 배포
+docker node update --label-add srv=nginx worker01
+docker node update --label-add srv=nginx worker02
+docker node update --label-add os=centos worker02
+docker node update --label-add os=centos worker03
+
+docker service create --name nginx -p 8001:80 --constraint 'node.labels.srv == nginx' --replicas 2 nginx
+docker service create --name httpd -p 8003:80 --constraint 'node.labels.os == centos' --replicas 2 httpd
+> nginx : nginx 기본페이지 뜸  centos : itworks! 뜸 
+
+docker service create --name nginx -p 8001:80 --constraint 'node.labels.srv == nginx' --replicas 2 nginx;
+docker service create --name httpd -p 8003:80 --constraint 'node.labels.os == centos' --replicas 2 httpd
+
+
+-docker hub에 이미지 올리기 
+ubuntu에서 docker login입력후 로그인하기
+docker push ciw0707/image:tag
+
+
+-docker swarm 볼륨옵션 사용하기
+docker service create --name nginx -p 80:80 --constraint 'node.role == worker' --replicas 2 --mount type=bind,source=/home/user1,target=/user/share/nginx/html nginx
+> 모든 노드에 존재하는 디렉토리만 연결할수 있음
+
+docker service create --name nginx -p 8001:80 --replicas 2 --mount type=volume,source=test,target=/root nginx
+
+docker service create --name nginx2 -p 8001:80 --replicas 4 --mount type=volume,source=test,target=/root nginx
+>각 서버별로 도커볼륨을 만들어 연결하기
+
+>이러한 방법을 사용하면 각 컨테이너의 볼륨내의 정보가 동일하지않음
+그러므로 외부에 있는 스토리지를 사용하여 nfs등으로 연결해준뒤 사용하는것이 추천됨
+
+
+docker stack : docker swarm + docker-compose
+서비스 제공환경을 yml파일에 작성하고 이를 클러스터(swarm)환경에 일괄적으로
+배포할수 있다.
+
+
+
+-----------------------------------------------------------
+-82~83page 
+
+docker network create --driver=overlay --attachable web 
+>--attachable : docker container run으로 만들어진 컨테이너들도
+오버레이네트워크에 속할수있음
+
+/var/run/docker.sock > 
+
+external : true > 껏다가 켜도 네트워크 정보를 유지하겠다.
+
+centos 7 에 httpd 를 설치하고 웹페이지를 인터넷에서 받아서 사용하기
+wget https://www.free-css.com/assets/files/free-css-templates/download/page266/radiance.zip
+*add로 붙이는과정에서 디렉토리가 들어가버리는경우가 있으므로, unzip 하여 사용하기 
+
+VMware networkmanager설정에서 nat네트워크의 port forwarding 설정하기
+10.5.1.x:8080 > 211.183.3.100:80 >haproxy :80 > workers
+
+-Dockerfile 작성
+FROM centos:7
+RUN yum install -y httpd
+ADD ./radiance /var/www/html/
+CMD /usr/sbin/httpd -D FOREGROUND
+EXPOSE 80
+
+docker build -t ciw0707/test:02 . 
+>도커허브에 올리기위해 이름을 다음과 같이 작성해야함
+
+docker login
+
+docker push ciw0707/test:02
+
+-다른노드들로 이동
+도커허브에 이미지를 올린뒤 다른 노드에서 다운로드함
+docker login 
+docker pull ciw0707/test:02
+
+yml파일 작성하기
+vim web.yml
+--------------------------------------------------
+version: '3'
+
+services:
+
+  nginx:
+    image: ciw0707/test:02
+    deploy:
+      replicas: 3
+      placement:
+        constraints: [node.role != manager]
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    environment:
+      SERVICE_PORTS: 80
+    networks:
+      - web
+
+  proxy:
+    image: dockercloud/haproxy
+    depends_on:
+      - nginx
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+    networks:
+      - web
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.role == manager]
+
+networks:
+  web:
+    external: true
+--------------------------------------------------------
+
+docker stack deploy --compose-file=web.yml web
+
+10.5.1.5:8080 혹은 211.183.3.100으로 접속하여 동작확인
+
+
+yum install -y dialog
+dialog --msgbox "hello all" 10 20
+dialog --title "plz answer me" --yesno "doyou like me?" 10 20
+echo $?
+
+dialog --title "test" --inputbox "ur name?" 10 20 2>name.txt
+cat name.txt
+
+
+
+# apt-add-repository ppa:ansible/ansible
+# apt-get update 
+# apt-get install -y ansible
+
+[centos의 경우]
+yum -y update
+yum -y install epel-release
+yum -y install ansible
+
+/etc/ansible/hosts 파일 가장아래에 
+211.183.3.101
+211.183.3.102
+211.183.3.103 
+을 등록한다
+
+/etc/ssh/sshd_config에서
+PremitRootLogin yes 으로 변경후
+systemctl restart ssh
+systemctl restart sshd
+
+ansible all -m ping -k
+
+ansible all -m user -a "name=user9" -k
+ansible all -m shell -a "cat /etc/passwd | grep user9" -k
+ansible all -m user -a "name=user9 state=absent" -k
+ansible all -m shell -a "cat /etc/passwd | grep user9" -k
+
+
+
+ansible all -m apt -a "name=git state=present" -k
+ curl https://www.kbstar.com -o index.html
+
+
+
+
+-visualizer yml파일
+----------------------------------------------------------------
+version: '3'
+
+services:
+  visual:
+    image: dockersamples/visualizer
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.role == manager]
+---------------------------------------------------------------
+
+ docker stack deploy -c visual.yml visualizer

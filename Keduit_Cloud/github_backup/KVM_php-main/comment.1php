@@ -1,0 +1,11 @@
+<?php
+session_start();
+$comment=$_POST['comment'];
+$id = $_SESSION['id'];
+include 'include/mariadbcon.php';
+//$con = mysqli_connect("172.17.0.3", "root", "diak1351!","testdb") or die ("Mysql connection fail !!!");
+$sql = "insert into comment values('$id', '$comment')";
+mysqli_query($con, $sql);
+mysqli_close($con);
+echo("<script>location.href='comment.php';</script>");
+?>

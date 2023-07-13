@@ -1,0 +1,42 @@
+#! /bin/bash
+hap=0
+echo " 비밀번호입력"
+read pswd
+while [ $pswd != "ciw0707" ] 
+do
+
+if [ $hap = 4 ]
+then
+exit
+fi
+
+hap=`expr $hap + 1`
+echo "비밀번호 $hap 회 오류 "
+echo "비밀번호입력"
+read pswd
+done
+
+echo " 비밀번호확인"
+read pswd1
+if [ $pswd1 != $pswd ]
+then
+echo "비밀번호오류"
+exit 0
+fi
+
+fname=/home/user/aa
+if [ -f $fname ]
+
+then
+echo " 수정전"
+read word
+echo "수정후"
+read word1
+echo "입력 : $word"
+echo "입력 :$word1"
+sed -i 's/'$word'/'$word1'/g' /home/user/aa
+cat aa
+
+else
+echo " 파일이 존재하지않습니다"
+fi

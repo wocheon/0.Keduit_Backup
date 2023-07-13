@@ -1,0 +1,375 @@
+-------------------html -------------------------------
+<html>
+	<head>
+		<title>테스트중</title>
+	<head>
+	<body>
+	<p>HELLO</P> <p> world</p>
+	
+	
+	</body>
+</html>
+
+[결과]
+테스트중 
+-----------------------
+HELLO
+world 
+----------------------
+
+<html>
+	<head>
+		<title>테스트중</title>
+	<head>
+	<body>
+	<p>
+	<h1>이것은h1</h1><h2>이것은 h2</h2> 이것은 h4</h4>
+	</p>
+	</body>
+</html>
+
+[결과]
+테스트중 
+-----------------------
+이것은h1
+이것은 h2
+이것은 h4
+----------------------
+> 모두 하나의<p>(단락이고) 각 행마다 하나씩 h옵션이 들어감
+
+
+<b> 볼드체
+<strong> 
+<code>
+
+-리스트만들기
+<ul>  > 앞에 기호를 붙임
+ <li>aa</li>
+</ul>
+
+<ol> > 앞에 숫자를 붙임
+ <li>aa</li>
+</ol>
+
+
+-하이퍼링크-
+
+<html>
+	<head>
+		<title>테스트중</title>
+	<head>
+	<body>
+	<a href="http://www.googel.com" target="_self">구글1</a><br>
+	<a href="http://www.googel.com" target="_blank">구글2</a>	<br>
+	<a href="http://www.googel.com">구글3 </a><br>
+	<a href="a.html " >a.html</a>
+	</body>
+</html>
+
+[결과]
+구글1 > 현재페이지에서 구글이 열림
+구글2 > 새로운창이 열리고 구글이 열림
+구글3 > 구글1과 동일 (target이 없으면 default값은 _self 이다)
+
+<a href="a.html " >a.html</a>
+
+경로에 따른 파일 설정
+
+./a.txt  > html파일 위치에 있는 a.txt파일 지정
+../a.txt  > html파일 상위디렉토리에 있는 a.txt파일 지정
+
+<html>
+	<head>
+		<title>테스트중</title>
+	<head>
+	<body>
+	<a href="#sec1">참고사항으로 이동 </a><hr>
+	<a href="#bottom">아래로 이동 </a><hr>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<a id="sec1">참고사항 </a> 
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<p>...</P>
+	<a id="bottom">copyright</a>
+	</body>
+</html>
+
+
+<html>
+	<head>
+		<title>테스트중</title>
+	<head>
+	<body>
+	<h2>수리산</h2>
+	<hr>
+	<img src="san.jpg" width="500" height="200" alt="수리산">
+	</body>
+</html>
+
+san.jpg의 사본을 만들고 그림판에서 크기를 50으로 조정
+
+<html>
+	<head>
+		<title>테스트중</title>
+	<head>
+	<body>
+	<h2>수리산</h2>
+	<hr>
+	<a href="san.jpg" target="_blank"> 
+	<img src="th_san.jpg" width="500" height="200" alt="수리산">
+	</body>
+</html>
+
+w3schools.com > 여러 언어를 배울수있는 사이트
+
+<html>
+	<head>
+		<title>테스트중</title>
+	<head>
+	<body>
+	<h2> 자주가는 사이트 </h2>
+	<iframe src="http://www.naver.com" width="300" height="120"></iframe>
+	<iframe src="http://www.daum.net" width="300" height="120"></iframe>
+	<iframe src="a.html" width="300" height="120"></iframe>
+	</body>
+</html>
+
+<html>
+	<head>
+		<title>테스트중</title>
+	<head>
+	<body>
+		<div style="height:20px; background-color:yellow"></div>
+		<div style="height:20px; background-color:black"></div>
+		<div style="height:20px; background-color:red"></div>
+	</body>
+</html>
+
+
+<html>
+	<head>
+		<title>테스트중</title>
+	<head>
+	<body>
+		<form action="input.php" method="post">
+		<input type="text" name="input"/>
+		<input type="submit">
+		</form>
+	</body>
+</html>
+
+> 사용자로부터 값을 받아서 WAS에 보내주는것이 가능함
+
+
+
+CSS 선택 priority
+
+1.개체 2. 내부 3.외부
+
+
+CSS 선택자
+
+1.타입선택자 
+가장기본적인 선택자  
+ex) h1 {color : green; } 앞부분을 key 뒷부분을 value라 한다.
+
+2. 전체 선택자
+*{color : blue;}
+
+3. ID 선택자
+#special {color : red;}
+<p id="special"> (p단락에 special의 스타일 시트가 붙게된다)
+사용빈도 매우높음
+
+[실습]
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Web Font Test</title>
+	<style>
+		@font-face {
+			font-family: "NanumBarunGothic";
+			src: url("https://drive.google.com/file/d/1UbuTkQQUn1sdHSzy9rtEIRNL4qo1v4Cq/view?usp=sharing");
+		}
+		h2 { font-family: "NanumBarunGothic", serif ;}
+		p { font-family: serif ;}
+	</style>
+</head>
+<body>
+	<h2>
+	웹폰트 테스트
+	</h2>
+	<p>
+	웹폰트 테스트1
+	</p>
+	
+	<hr>
+	<p>이것은 네이버에서 제공하는 "나눔바른고딕" 체 입니다	</p>
+	
+</body>
+</html>
+
+
+
+https://webpagetest.org/
+
+[실습] 배경 + CSS
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Web Font Test</title>
+	<style>
+		@font-face {
+			font-family: "NanumBarunGothic";
+			src: url("https://drive.google.com/file/d/1UbuTkQQUn1sdHSzy9rtEIRNL4qo1v4Cq/view?usp=sharing");
+		}
+		body { font-family: "NanumBarunGothic",serif; 
+					background-image: url(back.png);
+					background-repeat : repeat-x;
+					background-attachment: fixed;
+					
+					color : #FFFFFFFF;
+					}
+		p { font-family: serif;}
+		
+	</style>
+</head>
+<body>
+	<h2>
+	웹폰트 테스트
+	</h2>
+	<p>
+	웹폰트 테스트1
+	</p>
+	
+	<hr>
+	<p>이것은 네이버에서 제공하는 "나눔바른고딕" 체 입니다	</p>
+	<p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p>
+	<p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p>
+	<p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p>
+	<p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p>
+</body>
+</html>
+
+[실습]
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 5000px;
+  background-color: black;
+  }
+li { display: inline-block;}
+
+li a {
+  display: block;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+/* Change the link color on hover */
+li a:hover {
+  background-color: #006699;
+  color: white;
+}
+
+
+
+
+</style>
+</head>
+<body>
+<br>
+<div style="font-size:3em; font-family:impact; color:#0066CC;" align="center">
+MANAGEMENT PAGE
+	</div>
+	<br>
+<ul>
+  <li><a href="#home">Home</a></li>
+  <li><a href="#news">News</a></li>
+  <li><a href="#contact">Contact</a></li>
+  <li><a href="#about">About</a></li>
+</ul>
+
+</body>
+</html>
+
+
+
+외부 css
+-사용법
+<head>
+	<link rel="stylesheet" href="경로.css" type="text/css">
+</head>
+
+-css파일 작성 
+경로.css
+@charset "utf-8";
+
+h1{
+	font-size: 30px;
+	font-weight: normal;
+	margin: 0;
+	margin-bottom: 10px;
+}
+
+#progress-bar{
+	margin: 0;
+	padding: 0;
+	margin-bottom: 15px;
+	list-style: none;
+}
+
+.common-btn{
+	padding: 4px 6px;
+	background-color: #07C;
+	color: white;
+	border: none;
+	border-radius: 10px;
+	text-decoration: none;
+}
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,225 @@
+-20-12-31 
+*네트워크 용어 (용어 참고시 시스코에서 확인하기)
+
+프로토콜 : 통신규약 통신을 하는데있어서 눈에 보이던 보이지않던 정해져있는 약속사항
+ex) 어떤곳이던 upt케이블(일반적인 랜선)사용가능
+
+LAN(local area network) : 근거리 통신망, 한정된 장소안에서 통신을 하는것 , 이더넷(mac주소)필요
+
+WAN(wider area network) : 원거리통신망 LAN과 LAN간의 통신을 하는것  ip주소 필요
+
+MAC address : 이더넷 통신에 사용되는 주소 체계
+IP address : WAN 통신서비스에 사용되는 주소 체계
+
+인터페이스(interface) : 표준이 있는 접속점/접속규격, 어떤 통로가되는 접속점/접속규격
+
+서버 : 서비스를 제공하는 장치  클라이언트 : 서비스를 요청하는 개체(장치,프로그램 etc)
+
+NIC(network interface card) : LAN카드(우리나라에서만 사용)/이더넷카드 
+
+peer to peer(PTP) : 역할이 동등한 통신관계, 연결된개체들이 서로 서버와 클라이언트관계가 될수있는것 
+
+대역폭(bandwidth) : 정보를 전송하는 폭, 네트워크를 구성할때 가장먼저 고려하는것(cost때문), 병목현상
+speed(속도)와 의미는 다름. 비슷한 개념으로 강의중에 진행. 단위 > bps(bit/sec)
+
+데이터 처리율(throughput)
+
+클라우드(cloud) : 통신망, 데이터망 
+
+토폴로지(topology) : 통신망을 그림으로 나타내는 형태
+
+
+OSI(open system interface) 7계층(layer)  참조모델
+7 응용계층 (어플리케이션) : 사용자 프로그램에 관련한 모든 프로토콜, 사용자가 직접사용하는 프로토콜
+ ex) http(hyper text trans protocal) FTP (file trans protocal), DNS(domain name sever/service/system)
+DHCP(컴퓨터에 ip를 할당해주는 프로토콜) telenet(원격에 접속하는 프로토콜) SMTP(메일보내기), POP3
+*하이퍼텍스트 > 웹상에서 사용하는 텍스트, 링크가능
+
+6 표현계층 (프레젠테이션) : 구문(syntext)상의 압축/저장/암호화 하는 방식( 어떻게 표현할것인가?)
+ex) ASCII,JPEG,MPEG,MIDE
+
+5 세션계층 (연결) : 시스템,애플리케이션, 사용자간의 연결을 설정하는 역할
+*듀플렉스
+
+4 전송계층(트렌스 포트) : 지점간의 흐름제어, 에러제어 (투명성 보장)
+송신자&수신자, Source&destination, sever&client
+ex) port 번호(서버와 클라이언트간에만 필요), flagment(세분화)
+*라우팅 : 패킷을 어떤 루트로 보낼것인가 결정하는것
+*트러블슈팅은 1계층부터 순차적으로 체크
+
+TCP/UDP의 차이 : 신뢰성 > 이어받기가 가능하다면 TCP(TCP프로토콜에는 순서번호가있음)
+연결지향적/비연결지향적 > 상호간에 신호(ACK)를 주고받으면서 데이터를 전송(연결지향적)>TCP
+윈도우사이즈 : 한번에 몇개씩 보낼것인지 결정, 가변적임, 응답측과 수신측이 서로다를수있음
+
+3 네트워크 : 중계기능, 경로설정 ex) IP, ICMP(internet control message protocal),ping 
+ttl(time to live) : 패킷이 거쳐갈수있는 수를 값으로 준것, 0이되면 패킷이 자동파기
+
+2 데이터 : 인접노드의 흐름/에러 제어(투명성 보장), 나가는 포트에서 받는 인접 노드간에 사용되는 프로토콜
+ex이더넷 : mac address>LAN프로토콜, PPP/HDLC> WAN 프로토콜 (1대1 대응)
+이더넷 프로토콜은 wan케이블에서 사용할수없음 (mac address때문)
+
+1 물리 : 케이블, 전기적, 전자적, 절차적인 약속사항
+데이터 통신 : 표준이있는 케이블을통해서 통신하는것
+utp,stp,광케이블,V.35,동축케이블
+
+OSI 계층별 데이터 단위(PDU : Protocal Data Unit)
+567 : data
+4 : segment
+3 : packets
+2 : Frames
+1 : bits
+
+TCP/IP 프로토콜 : 인터넷에서 사용되는 여러 프로토콜을 통틀어 말하는것
+5.응용계층 (OSI의 7,6,5 계층이 포함됨)
+4.전송계층
+3.인터넷계층
+2.데이터 링크계층
+
+라우터 : cpu기반
+L2 스위치(ASIC,칩) : 칩기반 스위치는 LAN장치(LAN프로토콜사용)
+
+
+-21-01-04 
+
+flagmentation(단편화) : 송신측에서 사용
+
+#응용계층(7계층)의 프로토콜별 사용 포트(암기필요)
+
+DNS : TCP,UDP 둘다가능(개발환경에 따라 변화), 53번 포트
+SMTP : TCP 25번포트
+FTP : TCP (data :  20/control : 21번)
+TFTP : UDP 69
+HTTP : TCP 80
+DHCP : UDP (client : 68/sever : 67) > 컴퓨터에 IP를 부여하는 프로토콜
+Telnet : TCP 23
+SSH : TCP 22
+
+ICMP : ping을 하는 프로토콜  소스ip / 목적지 / TYPE으로 구성
+echo 를 하면 echoreply를 돌려줌
+TYPE 필드 : echo-request 8 , echo-reply : 0 목적지까지 도달 불가 : 3
+#보안을위해 ping을 막아두는 경우가 있어서 결과가 요청시간 만료나 도달 불가로 나올수 있음
+*ICMP는 3계층 프로토콜 > HTTP는 안되어도 핑은 가능할수 있음
+
+
+ARP : 2계층프로토콜, 목적지ip는 알지만 mac은 모를때 사용하는(자동으로 발생) 프로토콜
+RARP(Reverse) : mac은 있지만 ip가없을때 ip를 요청하는 프로토콜
+
+버스형 : 하나의 회선을 같이 쓰는 방식, 충돌발생가능
+
+(토큰)링형 : 토큰을 가지는 장치만 트래픽을 받을수있음 
+충돌 발생하지않고 안전하지만, 많은 사용자가 사용하기 힘듬
+
+랜선 초록불 : 정상 / 노란색 : 트래픽잼(트래픽몰림)
+
+multiplexing : 여러개의 프로그램(작업)을 동시에 실행 (다중화 기능 제공), 4계층에서 사용
+ex) FTP로 파일 받으면서 HTTP로 웹검색 SMTP으로 메일수신이 가능함
+
+multiprocessing : 처리장치가 여러개(CPU), 기계에 사용
+
+*전형적인 시스템 간의 접속순서
+1. 동기화 요청 (SYN)
+2. 동기화 요구에 대한 수신확인(ACK)
+3. 역방향으로 접속 매개변수 동기화(SYN/ACK)
+4. 쌍방간의 접속이 성립했다는거에 대한 동의했음을 목적지에 알림(ACK)
+이 과정이 이루어진 후 데이터 전송시작
+
+3way handshake > 프린트물 확인
+
+포트번호를 보고 상위계층에서 어떤 프로그램을 사용할것인가 파악하고 실행
+
+*38페이지 확인문제 23/1028/11
+*41페이지 확인문제 응용/전송/네트워크 
+
+ipv6 > 용도별로 ip가 여러가지가 존재, mac주소와 규칙을 결합해서 만듦
+ipconfig/all > ip정보(l3), l2(mac주소)
+ipconfig/renew : 호스트가 동적 ip일떄 DHCP서버에게 IP를 재 요청
+ex)DNS서버 아이피가 바뀌거나 했을경우 통신이 가능한 새로운 ip를 할당함
+
+[tracert www.naver.com]
+
+#시스코장비에서 L2인터페이스 MTU사이즈 확인
+show interface 인터페이스타입
+이더넷 : 기본 MTU 1500byte (실제서비스에서는 변경해서 주로사용)
+
+=========================================================
+#패킷트레이서 ciw0707@naver.com 비번 > 앞 대문자 
+라우터는 2621xm 사용
+
+콘솔케이블 : 장비가 초기화 되었거나 긴급장애가 생겼을경우 모니터에 연결해서 사용(모니터선)
+*콘솔포트와 연결한다고해서 통신이 되는것이아니다
+
+터미널서버 : 콘솔포트를 접속이 가능하도록 하는 집전장치 ex)2511
+한번에 여러대의 장비에 접속이 가능하도록 함
+
+#RX232 >전기신호 포트
+
+WIC (WAN interface card)
+
+2T > 2개 터미널 
+
+WAN 케이블 종류
+v.35 DTE / v.35 DCE (디지털신호를 아날로그로 변환할때 사용하는 케이블?)
+
+시리얼 0/0의 의미 : w0슬롯의 시리얼 0번에 연결 (0/0 = 모듈이나슬롯번호/포트번호)
+
+10BASE-T : Twisted pair> 전송하는데있어서 간섭이 적음
+GBIC 카드
+sx > short 광케이블 multi mode 사용 / lx > long 광케이블 single mode사용 
+
+10/100 ethernet card 
+
+두대의 컴퓨터가 직접연결 > 크로스오버케이블
+두대의 컴퓨터를 스위치를 통해 연결 > 스트레이트 케이블( 스위치가 꼬는 역할을 해줌)
+
+두 장치 모두 cpu가 있거나 없는경우 : 동종 >크로스오버
+한 장치에는 cpu가 없는경우/두 스위치 연결시 한 스위치가 꼬아주는 기능이없는경우 : 이종 > 스트레이트 
+
+#라우터의 인터페이스는 기본적으로 관리자가 명령을 입력하지않는한 모두 셧다운 되어있음 
+> 케이블을 연결해도 바로 통신이 불가능, 케이블 연결후 반드시 설정으로 no shutdown 명령어 입력해야함.
+
+#스위치, 라우터의 인터페이스 요약정보 확인 (show ip interface brief : L1, L2 동작여부, IP입력값)
+
+
+UTP 568A, 568B 8개심선 위치 색깔 표준
+
+ipconfig, ipconfig/all, ipconfig/renew(유동 IP)
+
+
+라우터 CLI탭 엔터
+
+Router > ena
+Router# show ip int brief
+>>라우터 인터페이스  no shut
+
+Router#conf t
+Router(config)#int rang fa 0/0 - 1
+Router(config-if-range)#no shutdown
+Router(config-if-range)#ctrl+z
+
+fa 0/0 maul down down
+fa 0/1 maul down down
+
+#허브에서는 연결 확인방법이 없음(콘솔포트가 없음)
+
+===================================================
+
+-21-02-05
+
+물리계층 = 통신매체 [LAN > UTP(568A,568B / WAN >serial cable(v.35 -DTE,DCE)]
+
+fastEthernet( 100M지원)>[interface fa 0/0, int fa 0/0], ethernet(10M)>[interface e 0]
+
+>serial(직렬) : interface serial 0/0 (int s 0/0)
+
+통신에서는 같은조건상에서 직렬연결보다는 병렬연결이 속도가 빠름
+하지만 WAN의 경우에는 직렬통신을 선택
+
+       
+======================================================================
+
+-21-02-08
+
+리눅스 7.0으로 진행하고 8.0에서 필요한 사항은 따로 배포
+
+sjlee@nobreak.co.kr > 이수진 강사님 (리눅스 강사님)
+

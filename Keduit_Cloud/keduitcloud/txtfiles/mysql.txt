@@ -1,0 +1,931 @@
+mysql 설치
+
+-custom install
+mySQL server 8.0.22
+MySQL Workbench 8.0.22
+sample and Examples 8.0.22
+
+DBMS : 데이터를 표에 넣어서 관리한다.
+
+ex) RDBMS
+
+SQL은 표준언어이며 사용자와 DBMS들의 요구를 전해줄수 있는 언어
+
+오라클 : PL/SQL
+mysql : SQL
+windows : T-SQL
+
+행 : row 
+열 : column
+
+정보를 저장하기 위해서 하나의 테이블이 아닌 여러개의 테이블로 나누어서 
+저장함으로써 불필요한 공간의 낭비를 줄이고 데이터 저장의 효율성을 보장
+
+이렇게 나뉜 테이블의 관계를 기본키와 외래키를 사용하여 맞아줌으로써
+두 테이블을 부모와 자식의 관계로 묶어줄수 있다.
+
+block-chain 한곳에 서버를 몰아두는것이아닌 각자의 원장을 가지고 
+데이터의진실유무를 파악하여 업데이트를 결정함
+
+[정보시스템 구축의 5단계]
+
+1. 분석 : 요구사항 분석
+2. 설계 : 시스템 설계 혹은 프로그램 설계를 어떻게 할 것인가? (도면그리기)
+            > DB에서는 이 단계를 모델링 단계라 한다.
+3. 구현 : 실제로 프로그래밍을 실행하는 단계, 데이터 삽입단계
+4. 시험 : 테스트 베드
+5. 유지보수 : 
+
+[데이터베이스 구축 절차]
+DB생성 > 테이블 생성 > 데이터 입력 > 데이터 조회/활용
+
+mysql의 schema : DB 
+
+[실습 Schema 만들기]-Workbench
+schema에서 create schema
+mysql CLI에서 show databases;로 확인
+table을 만들고 select rows 로 데이터 입력
+
+CHAR(8) 데이터를 받을때 고정된 8칸의 길이로 데이터의 값을 받아들인다.
+VARCHAR(8) 데이터를 받을때 8칸의 길이로 데이터의 값을 받아들이고
+남는 칸은 지워버림 ( 가변길이 )
+
+pk(primary key) 값은 유니크 해야하며, null값을 허용하지않는다 (nn{not null})
+use testdb;
+show tables;
+desc memdertbl;
+
+show memdertbl;
+
+select membername,memberid from membertbl;
+
+views : 가상의 테이블 (실제로는 select)
+
+select * from membertbl;
+select * from membertbl where memberaddress='서울' ;
+select * from membertbl where memberaddress='용인' ;
+> 정확하게 매치가 되지않으면 데이터를 골라낼수 없다.
+
+index : 찾아보기, 색인
+ex) 책한권에 정보통신이라는 단어를 찾으려할떄
+첫번째 장에서부터 하나하나 찾을수도
+가장 뒷장에있는 색인 항목에서 찾을 수도있다
+이떄 색인을 사용하면 훨씬더 빠른 속도로 정보를 찾을 수있게 됩니다.
+
+
+HAMC : hash + key 
+
+
+뷰 : 가상의 테이블
+별도의 실제 테이블을 갖는 것이 아닌일종의 원본테이블에 대한링크개념
+별도의 공간을 차지하지않아 공간활용률을 높일수 있음
+또한 접근권한을 별도로 부여할수 있어 보안성 강화 가능
+추가적으로 이를 관리하는 사용자에게 민감한 정보는
+제공하지않을 수 있으므로 이또한 보안에 도움이 된다.
+
+[실습] view 테이블 만들기
+CREATE VIEW v_membertbl
+AS
+SELECT membername, memberaddress from membertbl;
+
+터미널에서
+use testdb;
+show tables;
+desc v_membertbl;
+
+[ 실습 ]procedure를 설정하고 실행하기
+-workbench 
+create newsql tab 
+DELIMITER //
+CREATE PROCEDURE myproc()
+BEGIN
+	SELECT * FROM membertbl WHERE membername LIKE '김%';
+	SELECT * FROM membertbl WHERE memberaddress = '서울';
+END //
+
+DELIMITER ;
+
+번개모양 클릭
+
+새로운 tab 생성
+CALL myproc();
+
+
+트리거 (방아쇠)
+함수의 기능과 비슷하다.
+트리거와 비슷한 기능을 클라우드 환경에서 자주 사용
+ex) AWS에서는 람다함수를 사용하는데 이것이 트리거와 함수의
+기능을 묶어놓은 것이라 할 수 있음.
+
+테이블의 지정된 행 열등을 모니터링 하고 있다가
+특정 sQL구문 ex) delete update,insert 등과 같은 명령이 실행되면
+이를 별도의 테이블에 담을수 있도록 하는기능
+
+[실습] > 트리거 만들기 (삭제되면 임시저장소로 입력)
+>회원이 회원 탈퇴하면 "delete"가 발생하게 된다.
+이 delete가 일어나면 방아쇠가 당겨지고 해당 정보를
+별도의 테이블에 담는다. 이때 탈퇴한 시간을 CURDATE 를 통해
+자동 기록되도록 할 수 있다.  
+
+
+CREATE table deletedmembertbl (
+	memberid INT,
+    membername CHAR(10),
+    memberaddress CHAR(20),
+    deleteddate DATE
+);
+
+
+DELIMITER //
+CREATE TRIGGER trg_membertbl
+	AFTER delete 
+    on membertbl
+    FOR EACH ROW
+BEGIN 
+	INSERT INTO deletedmembertbl VALUE 
+    ( OLD.memberid, OLD.membername, OLD.memberaddress, CURDATE() );
+END //
+
+DELIMITER ;
+
+DELETE FROM membertbl where memberid = '2' ;
+
+deletedtable에 가서 확인해보기
+
+
+DB연결
+-개발환경 : 통합 개발환경 소프트웨어 : IDE > 이클립스, visual studio
+AWS에서는 대표적으로 cloud 9 이라는 통합개발환경을 제공한다.
+
+기본적인 SELECT 형식
+select 열이름 from 테이블면 where 조건
+
+SQL의 대소문자 구분 : 일반적으로 구분하지않는다
+
+sql의 주석처리
+
+한줄주석 : --한줄주석
+여러줄주석 : /* 이것은 주석처리
+                입니다*/
+
+-database 삭제시
+drop database test;
+drop databases test; (x)
+
+int > smallint > tinyint
+
+
+[실습] 리눅스에 mariadb 설치
+[root@KVM1 ~]# cat /etc/yum.repos.d/mariadb.repo
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.4/centos7-amd64
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+
+yum -y install MariaDB
+
+*이전에 설치되어있던 경우 완전히 삭제하기
+systemctl stop mariadb
+systemctl stop mysql
+systemctl disable mariadb
+systemctl disable mysql
+
+rm -rf /var/lib/mysql
+yum remove mysql*
+yum remove MariaDB*
+
+
+grant all privileges on *.* to user1@'%' identified by 'user1';
+grant all privileges on *.* to user1@'localhost' identified by 'user1';
+
+create database testdb;
+show databases;
+
+use testdb;
+
+create table systemenv (
+    -> num INT AUTO_INCREMENT NOT NULL PRIMARY key,
+    -> hostname CHAR(20) NOT NULL,
+    -> username CHAR(20) NOT NULL,
+    -> home CHAR(20) not null
+    -> );
+
+
+ create table systemenv ( num INT AU                     TO_INCREMENT NOT NULL PRIMARY key, hostname CHAR(20)                      NOT NULL, username CHAR(20) NOT NULL, home CHAR(20) n                     ot null );
+
+desc systemenv;
+
+쉘스크립트만들기 
+vi test.sh
+-------------------------------------------
+#! /bin/bash
+mysql testdb -u user1 -puser1 -e 'select * from systemenv'
+mysql testdb -u user1 -puser1 -e "insert into systemenv(hostname,username,home) values ('$HOSTNAME','$USERNAME','$HOME')"
+
+if [ $? -eq 0 ]; then
+        echo "successfully inserted!"
+else
+        echo "wrong input detected!!"
+        exit 0
+fi
+
+
+mysql testdb -u user1 -puser1 -e 'select * from systemenv'
+-----------------------------------------------------
+
+실행하면 한줄씩 추가됨
+
+
+[실습 시나리오]
+가상머신의 이름은 ? :
+CPU개수는 ? :
+RAM(GB)? : 
+
+이후 설치를 진행후
+설치가 완료되면 위의 정보를 DB로 전송한다.
+
+DB정보 
+hostname    vmname  cpu  ram 
+  kvm          vm1   1   1
+
+
+  #! /bin/bash
+read -p "vmname ? " vmname
+read -p "vmcpu ? " vmcpu
+read -p "vmram ? " vmram
+read -p "root password ? " password
+
+virt-builder centos-7.8 --format qcow2 -o /vm/${vmname}.qcow2 --root-password password:$password
+
+virt-install --name ${vmname} --vcpus ${vmcpu} --ram ${vmram} --noautoconsole --disk path=/vm/${vmname}.qcow2 --import
+
+if [ $? -eq 0 ]; then
+        echo "successfully inserted!"
+else
+        echo "wrong input detected!!"
+        exit 0
+fi
+
+mysql testdb -u user1 -puser1 -e 'select * from instance_list'
+mysql testdb -u user1 -puser1 -e "insert into instance_list(hostname,vmname,vcpu,vram) values ('$HOSTNAME','$vmname',$vmcpu,$vmram)"
+
+
+
+mysql testdb -u user1 -puser1 -e 'select hostname as Hostname, vmname as VMname, vcpu as CPUs, vram as "RAMSIZE(MB)" from instance_list'
+-------------------------------------------------------------------------------------------------------------------------------------------------                                                                                                                                                         
+
+[실습] 원하는 데이터를 출력하기
+DB자료를 받아서 workbench에 붙이고 실행
+DROP database IF exists sqldb;
+CREATE database sqldb;
+211.183.3.222
+
+SELECT * FROM usertbl;
+SELECT * FROM buytbl;
+
+터미널을 열어서
+
+use sqldb;
+select * from usertbl WHERE birthyear > 1970;
+
+select * from usertbl WHERE birthyear > 1970 AND addr = '서울' ;
+select * from usertbl WHERE birthyear > 1970 or height = 175;
+
+select * from usertbl WHERE height between 180 and 183;
+
+select * from usertbl where name like '김%';
+
+-서브쿼리 
+쿼리 문 내에 또다른 쿼리를 둔다
+예를 들어 홍길동보다 키가 큰사람은 누구인가?
+1.홍길동의 키를 먼저 조사 (select height from usertbl where name'홍길동';)
+2.홍길동의 키를 별도로 기억  홍길동의 키 172
+3.select * from usertbl where height >172;
+
+한번에 쓰는법
+select * from usertbl where height > (select height from usertbl where name = '김경호');
+
+select * from usertbl order by height ;
+>오름차순 정렬 (키가 작은순부터 큰순서로)
+
+select * from usertbl order by height desc;
+>내림차순정렬 (키가 큰순서에서 작은순서로)
+
+select height,name from usertbl order by height desc;
+
+select distinct addr from usertbl;
+> 겹치는 항목을 제외하고 출력
+
+select distinct addr from usertbl order by addr limit 2;
+>겹치는 항목을 제외하고 출력하지만 2개까지만 출력시켜라
+
+create table test2 (select distinct addr from usertbl order by addr limit 2);
+해당 출력내용을 가지고 새로운 테이블을 생성
+
+select userid, SUM(amount) from buytbl group by userid ;
+>userid를 기준으로하여 amount의 합을 출력함
+
+select addr, count(addr) from usertbl group by addr order by count(addr) desc ;
+> 각 지역별 인원이 얼마나 있는지를 확인하고 count(addr)를 기준으로 내림차순 정렬
+
+select name, height from usertbl where height = (select max(height) from usertbl);
+or
+select name, height from usertbl order by height desc limit 1;
+> 가장 키가 큰사람의 이름과 키를 출력하라
+
+select userid, sum(amount*price) from buytbl group by userid having sum(price*amount) >1000;
+> 집계함수는 where절에 나타날수 없으므로 Having 을 사용해야한다.
+
+
+-SQL 구문(명령어)의 종류
+DML : 데이터 자체를 다룸 ex) select insert, update, delete 
+DDL : DB나 테이블 전체를 다룬다 ex) CREATE, DROP, ALTER
+DCL : 사용자에게 어떤 권한을 부여하거나 빼았을때 주로 사용
+ex) GRANT/REVOKE/DENY 
+
+insert into usertbl values (열이름 순서대로 데이터 입력해야함)
+ex) insert into usertbl values ('adb', ;이승기', 1978) ;
+
+or  insert into usertbl (userid, username birthyear) values ('abc', '이승기', 1978);
+    > null이 허용되지않는 것은 반드시 포함해야하며, 앞뒤 순서가 바뀌어도 상관없음
+
+AUTO_INCREMENT > 자동으로 번호를 부여함. 사용자가 직접 입력하지 않아도 자동으로 번호가 부여하거나
+보통 쇼핑몰의 주문번호나 회사의 사번등에 활용가능( 단 NULL은 허용 x) 또한 데이터도 직접 입력x
+
+시작번호 1, 증감번호 : 1> 변경가능
+일반적으로 id >pk, 주민번호 : unique (NULL허용)
+
+
+[실습] auto_increment 시작번호 변경하기
+
+create table testtbl2 ( id int AUTO_INCREMENT PRIMARY key, username char(10), addr char(10));
+
+alter table testtbl2 auto_increment=100;
+
+insert into testtbl2 values (null,'홍길동','경기 용인시');
+insert into testtbl2 values (null,'김철수','경기 수원시');
+
+select  * from testtbl2;
+>번호가 100번부터 시작하는지 확인
+
+update testtbl2 set addr='경기 광명시' where username= '홍길동';
+>만약 특정 사용자를 지정(where구문)을 하지않으면,
+모든 열이름 addr이 '경기 광명시'로 변경되므로 조심해야함
+
+
+delete from testtbl2 where username='홍길동';
+
+-inner join 형식
+----------------------------------
+select 열목록
+from <첫번째 테이블>
+    inner join <두번째 테이블>
+    on <조인될 조건>
+[검색조건]
+
+---------------------------------
+ex)
+ select *
+    -> from buytbl
+    -> inner join usertbl
+    -> on buytbl.userid = usertbl.userid
+    -> where buytbl.userid = 'KBS';
+
+select usertbl.name, usertbl.addr, usertbl.mobile1, usertbl.mobile2, buytbl.prodname
+    -> from buytbl
+    -> inner join usertbl
+    -> on buytbl.userid = usertbl.userid
+    -> where buytbl.userid = 'KBS';
+
+[실습] -두개의 테이블을 묶기+테이블의 별칭을 지정하여 사용
+mysql> select u.name, u.addr, CONCAT(u.mobile1, u.mobile2) as phonenumber, b.prodname
+    -> FROM buytbl b
+    -> inner join usertbl u
+    -> on b.userid = u.userid
+    -> where b.userid = 'KBS';
+
+
+
+[AWS콘솔 접속]
+
+IAM페이지에서 사용자 추가하기
+
+권한은 기존정책 직접연결
+
+AmazonEC2FullAccess and AmazonRDSFullAccess 체크
+계정생성후  csv파일을 받아 파일에 적힌 주소로 접속
+
+rds ec2제외하면 다른기능 사용불가
+mariadb 10.4.13 생성 
+(프리티어, 자동조정 비활성화 퍼블릭엑세스 가능 
+vpc 보안그룹 새로 생성:KVMDB-SG, 초기 데이터베이스 이름 : testdb
+유지관리 자동 업그레이드x)
+
+보안그룹 인바운드 규칙 : 0.0.0.0/0
+
+
+[root@KVM1 ~]# export AWS="kvmdatabase.cpebd8pnbh9j.ap-northeast-2.rds.amazonaws.com"
+[root@KVM1 ~]# echo $AWS
+kvmdatabase.cpebd8pnbh9j.ap-northeast-2.rds.amazonaws.com
+[root@KVM1 ~]# env | grep AWS
+AWS=kvmdatabase.cpebd8pnbh9j.ap-northeast-2.rds.amazonaws.com
+
+mysql -h AWS -u admin -ptest1234
+
+use testdb;
+
+
+hosttbl
+hostname char(20) pk
+ipaddr char(20) pk
+cpurate int
+
+vmtbl
+hostname char(20) 
+vmname char(20) pk
+vcpus int
+memory int
+
+----------------------------------------------------
+
+left outer join
+ 
+select U.name, U.addr, CONCAT(U.mobile1, U.mobile2) as '휴대폰번호', B.prodname, B.amount
+    -> From usertbl U
+    -> LEFT OUTER JOIN buytbl B
+    -> ON U.userid = B.userid
+    -> order by U.userid ;
+
+
+     select U.name, U.addr, CONCAT(U.mobile1, U.mobile2) as '휴대폰번호', B.prodname, B.amount
+    -> From usertbl U
+    -> LEFT OUTER JOIN buytbl B
+    -> ON U.userid = B.userid
+    -> order by B.amount ;
+
+JOIN : 두개이상의 테이블을 연결하는것
+
+
+    inner join : 양테이블에 모두 존재하는 정보에 대해서만 출력 가능
+                 ex) 고객, 구매 테이블에서 전체 구매 정보를 출력시,
+                 구매기록이 없는 사용자의 정보는 출력x
+
+    outer join : 이너 조인은 양테이블에 모두 존재하는 정보만을 출력
+                아우터 조인은 한쪽에 정보가 없더라도 모두 출력
+                정보가 없는 경우 null로 출력된다
+                
+                ex) 고객, 구매 테이블에서 전체 구매정보를 출력시,
+                구매기록이 없는 사용자의 정보도 출력되며, 구매내역은 null로 출력        
+
+                아웃터 조인은 left RIGHT가 있음
+                일반적으로 LEFT OUTER 사용
+                > 모델링에서 기준테이블은 왼쪽에 둔다
+
+
+    cross join : 두테이블간 모든 행을 " 카티션 곱 " 한다.
+
+    self join : 하나의 테이블을 마치 두개의 테이블인것처럼 하여
+                자신의 테이블을 자신의 테이블과 Join하는 것
+
+실체는 두개의 테이블이므로 특정 정보를 확인하기 위해서는 항상 
+복잡한쿼리를 작성해야함. 이를 간편히 하기위해
+두개의 테이블에서 자주 사용하는 또는 중요한 정보를 하나의 가상테이블로
+만들고 이 하나의 가상 테이블에서 정보를 출력하는 방법을 고려해야함
+이를 위해서는 가상테이블을 만드는 기술인 view가 필요하다
+
+cross join의 예
+고객테이블    제품테이블
+    a           선풍기
+    b           냉장고
+                전자레인지
+
+cross join 
+a-선풍기
+a-냉장고
+a-전자레인지
+b-선풍기
+b-냉장고
+b-전자레인지
+
+self 조인 - 자기자신과 자기자신이 조인한다
+>테이블 한개로 조인시킨다.
+
+[실습] -self 조인 해보기
+use sqldb;
+create table atable (name char(3), manager char(3), phone char(8));
+insert into atable values ('LEE', 'KIM', '2222-2');
+insert into atable values ('WOO', 'LEE', '2222-2-1');
+select * from atable;
+
+
+select A.name as '부하직원', B.name as '상사이름', B.phone as '상사전화'
+from atable A
+inner join atable B
+on A.manager = B.name;
+
+
+delimiter $$  > $$ 가 다음에 나와야 종료된다
+create PROCEDURE 이름 > 기능을 생성
+BEGIN
+        연산1;
+        연산2;
+        연산3;
+end $$ 
+
+delimiter ; > 원래의 종료 문자 ; 로 복귀
+
+call 이름 > 기능 호출
+
+drop procedure IF exists test
+DELIMITER //
+create procedure test()
+begin
+	declare var int ;
+    set var = 100;
+		
+        IF var = 100
+        then
+			select '100입니다';
+		else
+			select '100이 아닙니다';
+		end if;
+end //
+delimiter ;
+
+call test();
+
+
+drop procedure test3()
+DELIMITER //
+create procedure test3()
+begin
+	declare var int ;
+    set var = 99;
+		
+        IF (var%2) = 0 > 100%2 : 나머지값을 표기 100/2 : 몫값을 표기
+        then
+			select '짝수입니다';
+		else
+			select '홀수입니다';
+		end if;
+end //
+delimiter ;
+
+call test3();
+
+
+drop procedure test()
+DELIMITER //
+create procedure test()
+	begin
+	declare hdate date; -- 입사일
+    declare ndate date; -- 현재날짜, curdate() 함수이용
+    declare diffday Int; -- 두 날짜의 일수차이, 365로 나누어야하므로 INT로 지정
+    
+    select hire_date INTO hdate 
+		from employees.employees
+        where emp_no = 10001;
+    
+    set ndate = current_date();
+    set diffday = datediff(ndate, hdate);
+    
+    if (diffday/365) >= 5
+    then
+		select '5년이상 근무하셨네요. 축하합니다';
+	else 
+		select '아직 5년이 되지않았습니다.';
+    end if
+    
+    end //
+delimiter ;
+
+call test();
+
+[실습]
+현재 우리가 사용하는 usertbl을 확인하고
+김범수의 건강검진 가능 여부를 확인 하라
+만약 김범수가 홀수년도에 태어났다면 올해가 건강검진 대상자이다.
+
+결과는 아래와 같아야한다.
+
+ex) 김범수가 1979년생인경우
+
+"건강검진 대상자 입니다."
+아닌 경우
+"내년에 건강검진을 받으세요"
+
+
+drop procedure test1()
+DELIMITER //
+create procedure test1()
+	begin
+	declare bdate int;
+    
+    select birthyear INTO bdate 
+		from usertbl 
+        where userid = 'KBS';
+        
+    if (bdate%2) = 0
+    then
+		select '내년에 건강검진을 받으세요';
+	else 
+		select '건강검진 대상자입니다';
+    end if;
+    
+    end //
+delimiter ;
+
+call test1();
+
+
+1~100 사이의 숫자중 홀수만 더하시오
+delimiter //
+create procedure whiletest2()
+begin
+
+declare i int;
+declare hap int;
+
+set i = 1;
+set hap = 0;
+
+MYwhile: while ( i <= 100 ) do
+	if (i%2 = 0 ) then
+			set i = i + 1 ;
+            iterate MYwhile;
+			end if;
+    
+    set hap = hap + i ;
+    set i = i + 1 ;
+	end while;
+	select hap;
+
+end//
+delimiter ;
+
+call whiletest2();
+
+제약조건?
+> 데이터의 무결성을 지키기 위한 제한된 조건
+내가 입력한 데이터를 다른 데이터와 섞여 확인 할수 없다면
+이는 무결성이 훼손된 것이다.
+
+ex)
+-PK (PRIMARY KEY, null 허용 x 회원가입시 ID )
+-FK (FOREIGN KEY, fk를 따라서 pk에가보면 fk쪽 정보를 확인 할수 있어야함)
+-UNIQUE (주민번호 겹쳐서는 안된다-유일성보장, 단 null허용 )
+-CHECK
+-DEFAULT
+-NULL값허용
+
+-------------------- FK 관련 실습 ----------------------
+USE sqldb;
+ALTER TABLE buytbl > data 수정은 update   db,table 수정은 alter 
+	ADD FOREIGN KEY (userid) REFERENCES usertbl (userid);
+
+INSERT INTO buytbl VALUES(NULL, 'KBS', '운동화', 'NULL', 30, 2);  
+select * from buytbl where userid = 'KBS' ;
+
+> 전송 가능
+
+INSERT INTO buytbl VALUES(NULL, 'KBT', '운동화', 'NULL', 30, 2);  
+select * from buytbl where userid = 'KBT' ;
+
+> 전송 불가능
+
+
+
+step1.
+aws 에서 "hosttable", "vmtable" 
+
+hosttable -> hostname : PK
+vmtable -> hostname : FK references hosttable(hostname)
+vmtable -> vmname : PK
+
+step2. 
+자신의 KVM 호스트명을 KVM1 으로 하고 , 인스턴스(vm)을 하나 생성한다. 
+virt-builder -l : cirros 
+(테스트용 가상머신, 별도의 패스워드 설정 필요없음. 이미 있음, username:cirros, password: cubswin:)
+
+  virt-builder -o a.img cirros-0.3.5 --size 5G
+  virt-install --name vm1 --vcpus 1 --memory 512 
+    --disk path=/root/a.img --network network:default 
+    --import 
+
+
+step3.
+ 자신의 호스트명을 KVM1 에서 KVM2로 변경한 뒤 아래의 내용을 다시 해본다 vm1 이름 동일한 상태에서는 생성이 불가하므로 반드시 vm 이름을 변경한 뒤 전송되어야 한다.
+
+ 최종결과 :    두 테이블을 INNER JOIN 하여 
+  host명 호스트IP주소  호스트CPU사용률 가상머신명 VCPUS  RAMSIZE
+
+*mysql 명령어에서는 ''를 사용해도 변수를 넣을수있음
+ex) mysql testdb -u user1 -puser1 -e "insert into instance_list(hostname,vmname,vcpu,vram) values ('$HOSTNAME','$vmname',$vmcpu,$vmram)"
+
+----------------------------------------------------------------------------------------------------
+*최종 수정안
+create view vm_view as
+select H.Hostname, H.IPaddr as HostIP, H.CPUrate as 'CPUrate(%)', V.vmname, V.vcpus as vCPUs, V.memory as 'vmram(MB)'
+from hosttbl H 
+inner join vmtbl V
+on H.Hostname = V.Hostname;
+
+> view테이블을 먼저 생성하고 쉘스크립트에서 사용, /root/에 colors.sh 생성(색깔echo 함수파일)
+mpstat이 불가능한경우 : yum install -y sysstat
+----------------------------------------------------------------------------------------------------
+
+#! /bin/bash
+source /root/colors.sh
+AWS="kvmdatabase.cpebd8pnbh9j.ap-northeast-2.rds.amazonaws.com"
+hostip=$(ip add show br01 | grep 192.168.1.* | gawk '{print $2}'| cut -c 1-13)
+cpurate=$(mpstat | tail -1 | gawk '{print 100-$13}')
+
+#install 
+bg_blue '###Create KVM Instance! (TEST.Ver)###'
+
+bg_mint "What is instance's name ? "
+read -p "Answer ? : " vmname1
+bg_mint "How many instance's vcpus? "
+read -p "Answer ? : " vcpus1
+bg_mint "instance's vrams size ? "
+read -p "Answer ? : " vram1 
+bg_mint "instance's disk size ? "
+read -p "Answer ? : " disk1
+
+#create db table
+mysql testdb -h $AWS -u admin -ptest1234 -e "insert into hosttbl values ('$HOSTNAME','$hostip',$cpurate)"
+mysql testdb -h $AWS -u admin -ptest1234 -e "insert into vmtbl values ('$HOSTNAME','$vmname1',$vcpus1,$vram1)"
+
+if [ $? -eq 0 ]; then
+        bg_green "successfully inserted!"
+else
+        bg_red "wrong input detected!!, STOP INSTALL INSTANCE"
+        exit 0
+fi
+
+#start install
+virt-builder cirros-0.3.5 --size ${disk1}G -o /root/${vmname1}.${disk1}.img
+virt-install --name ${vmname1} --vcpus ${vcpus1} --ram ${vram1} --noautoconsole --disk path=/root/${vmname1}.${disk1}.img --import
+
+mysql testdb -h $AWS -u admin -ptest1234 -e 'select * from vm_view'
+
+bg_blue "###install finished!!###"
+
+#mysql testdb -h $AWS -u admin -ptest1234 -e 'select * from hosttbl'
+#mysql testdb -h $AWS -u admin -ptest1234 -e 'select * from vmtbl'
+#mysql testdb -h $AWS -u admin -ptest1234 -e "select H.Hostname, H.IPaddr as HostIP, H.CPUrate as HostCPUrate, V.vmname, V.vcpus, V.memory as vmram from hosttbl H inner join vmtbl V on H.Hostname = V.Hostname"
+---------------------------------------------------------------------------------------------------------------------------------
+
+*테이블 열 설정 변경시
+ALTER TABLE `testdb`.`hosttbl` 
+CHANGE COLUMN `ipaddr` `ipaddr` CHAR(20) NOT NULL ;
+
+
+
+-fk 옵션
+on delete cascade : 기준(references)테이블이 삭제되면 참조데이터도 삭제
+on update cascade : 기준(references)테이블이 변경되면 참조데이터도 변경
+
+만약 따로 옵션을 지정하지않으면
+on update no action, on delete no action로 지정됨
+
+
+use sqldb;
+drop table if exists user,buy; 
+create table user (
+	userid char(8) not null primary key,
+    name varchar(10) not null,
+    brithyear int check(brithyear >=1900 and brithyear <= 2023) not null,
+    addr char(2) not null default '서울',
+    email char(30) null unique
+    );
+    
+create table  buy (
+	num int auto_increment not null primary key,
+    userid char(8) not null,
+    prodname char(6) not null,
+    FOREIGN KEY (userid) references user (userid) 
+    on update cascade
+    );    
+
+
+
+
+user table에서
+1.생년월일에 1111 입력 불가능한지 확인
+2.주소에 아무입력이 없어도 기본값이 서울로 들어가는지 확인
+3.userid를 바꾸면 buy에서도 userid가 바뀌는지 확인  (새로고침으로 확인)
+
+
+user 테이블에서 특정 열을 삭제하고자 할경우 (테이블 자체삭제:drop)
+alter table  user
+    drop column addr;
+
+alter table user
+    change column add addresss char (5) null;
+
+alter table user
+drop primary key;
+
+alter table user
+add primary key (userid);
+
+alter table user
+add phone char(13);
+
+
+-내가 생성한 제약조건 확인 후 수정
+select * from information_schema.table_constraints where table_name = '테이블명';
+> 테이블 기준 확인
+
+select * from information_schema.table_constraints where constraint_schema = '데이터베이스명';
+> 데이터베이스 기준 확인
+
+alter table vmtbl drop constraints vmtbl_ibfk_1;
+
+alter table vmtbl add constraint vmtbl_ibfk_1 foreign key (hostname) references hosttbl (hostname) on update cascade;
+
+
+----------------------------------------------------------
+실습 
+cpu는 1~4 사이에서만 선택 가능하며
+메모리는 1024 ~4096 사이에서만 선택가능해야한다.
+만약 cpu와 RAM을 선택하지않으면 vcpu는 1개 mem은 1024가 되어야한다.
+
+-default 값 추가 
+alter table vmtbl
+alter vcpus set default 1;
+
+-check 값 추가 
+alter table vmtbl
+add constraint vcpus check (vcpus >=1 and vcpus <=4);
+
+alter table vmtbl
+alter vram set default 1024;
+
+alter table vmtbl
+add constraint vram check (vram >=1024 and vram <=4096);
+
+*or 
+alter table vmtbl
+    change column vcpus vcpus int not null default 1 
+    check (vcpus >=1 and vcpus <=4);
+
+alter table vmtbl
+    change column vram vram int not null default 1024 
+    check (vcpus >=1024 and vcpus <=4096);
+
+
+index : "찾아보기", "색인"
+    색인을 사용하게되면 검색속도를 올릴수 있다.
+    그러나 색인을 사용한다고 해서 무조건 속도가 빨라지는 것은 아님
+
+[실습] -index 만들기
+use sqldb;
+select * from usertbl where name = '김범수';
+
+execution plan확인
+>full table scan Query cost 1.25 (10줄을 전부 확인)
+
+use sqldb;
+create INDEX idx_name On usertbl(name);
+select * from usertbl where name = '김범수';
+
+execution plan확인
+>non-unique key lookup  Query cost 1.10 (index를 사용하였음을 의미, 1줄만 확인함)
+
+drop index idx_name on usertbl;
+
+트리거 작성하기
+
+DELIMITER // 
+create TRIGGER trg_test
+    after delete
+    on usertbl
+    for each row
+begin
+    insert into backup_tbl values (OLD.userid, OLD.name, OLD.addr, OLD.mobile1...'삭제', curdate (), logname );
+end //
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
