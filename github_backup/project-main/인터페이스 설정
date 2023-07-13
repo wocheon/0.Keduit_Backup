@@ -1,0 +1,29 @@
+[root@localhost network-scripts]# cat ifcfg-ens32
+TYPE=Ethernet
+BOOTPROTO=none
+NAME=ens32
+ONBOOT=yes
+DEVICE=ens32
+NM_CONTROLLED=no
+dns=8.8.8.8
+GATEWAY=10.0.0.1
+IPADDR=10.1.1.5
+
+[root@localhost network-scripts]# cat ifcfg-ens33
+TYPE=Ethernet
+BOOTPROTO=None
+NAME=ens33
+DEVICE=ens33
+ONBOOT=yes
+BRIDGE=br01
+NM_CONTROLLED=no
+
+[root@localhost network-scripts]# cat ifcfg-br01 
+TYPE=bridge
+BOOTPROTO=none
+NAME=br01
+DEVICE=br01
+ONBOOT=yes
+IPADDR=192.168.1.120
+PREFIX=24
+NM_CONTROLLED=no

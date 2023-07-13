@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver-httpd
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      color: httpd
+      color: server
+  template:
+    metadata:
+      labels:
+        type: webserver
+        color: httpd
+        type: system
+        color: server
+    spec:
+      containers:
+      - image: gcr.io/ciw0707-0517/imageview:httpd
+        name: webserver-container
+        env:
+        - name: PROJECT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: projectid
+              key: project.id
+        - name: SECRET_ID
+          valueFrom:
+            secretKeyRef:
+              name: apikey
+              key: id
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: apikey
+              key: key
+        ports:
+        - containerPort: 80
+          name: http-server
