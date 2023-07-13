@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>가상머신 생성 페이지</title>
+	</head>	
+	<body bgcolor="888888">
+		<h3>가상머신 생성하기</h3>
+		<form action="createvm.php" method="post">
+		가상머신 이름 :	<input type="text" name="vmname"/><br>
+		가상머신 CPU 개수 : 
+		<select name="vcpus">
+			<option value="1">1 core</option>
+			<option value="2">2 core</option>
+		</select><br>
+		가상머신 메모리 크기 : 
+		<select name="ram">
+			<option value="1024">1 GB</option>
+			<option value="2048">2 GB</option>
+		</select><br>		
+		연결할 네트워크 : 
+		<select name="network">
+			<option value="bridge">인터넷 직접 연결함</option>
+			<option value="nat">NAT를 통해 주소변환 연결</option>
+			<option value="host-only">인터넷 연결 없음</option>			
+		</select><br>		
+		
+		<input type="submit" value="생성하기" onclick="alert('가상머신 생성을 시작합니다')">&nbsp;&nbsp;
+		<input type="reset" value="내용 지우기">
+		
+		</form>
+	</body>
+</html>
+
+-vmcreate.php
+
+<!DOCTYPE html>
+<html>
+        <head>
+                <title>가상머신 생성 페이지</title>
+        </head>
+        <body>
+<?php
+$vmname=$_POST["vmname"];
+$vcpus=$_POST["vcpus"];
+$ram=$_POST["ram"];
+$network=$_POST["network"];
+echo "vmname : "."$vmname"."<br>";
+echo "vmcpus : "."$vcpus"."<br>";
+echo "vram : "."$ram"."<br>";
+echo "network : "."$network"."<br>";
+?>
+
+<form action="result.php" method="post">
+<input type=hidden name=vmname value=<?=$vmname?>>
+<input type=hidden name=vcpus value=<?=$vcpus?>>
+<input type=hidden name=ram value=<?=$ram?>>
+<input type=hidden name=network value=<?=$network?>>
+<input type="submit" value="생성하기">
+</form>
+
+</body>
+</html>
+
+
+-testvm.sh
+#! /bin/bash
+echo $1>>vmconf
+echo $2>>vmconf
+echo $3>>vmconf
+echo $4>>vmconf
+
+
+-yum test1.php
+<!DOCTYPE HTML>
+<html>
+        <head>
+                <title> yum list installed </title>
+        <head>
+
+        <style>
+                h2 { color : olive; }
+                body { text-align: center; }
+        </style>
+
+        <body>
+                <h1> yum list test </h1>
+
+                <h1> result </h1>
+
+                <hr>
+                <h2>
+                <?php
+
+                echo nl2br(`ping www.google.com -c 20`)."<br>";
+                $a1="finished!!";
+                ?>
+        </h2>
+                <hr>
+
+                <h1><?=$a1?></h1>
+
+
+</body>
+</html>
+
+
+
+
+  <input type=hidden name=value1 value=<?=$_POST['value1'] ?>>
+  <input type=hidden name=value2 value=<?=$_POST['value2'] ?>>
+
+
+
+  <!DOCTYPE HTML>
+<html>
+        <head>
+                <title> yum list installed </title>
+        <head>
+
+        <style>
+                h2 { color : olive; }
+                body { text-align: center; }
+        </style>
+
+        <body>
+                <h1> yum list test </h1>
+
+                <h1> result </h1>
+
+                <hr>
+                <h2>
+                <?php
+$vmname=$_POST["vmname"];
+$vcpus=$_POST["vcpus"];
+$ram=$_POST["ram"];
+$network=$_POST["network"];
+
+echo "vmname : "."$vmname"."<br>";
+echo "vmcpus : "."$vcpus"."<br>";
+echo "vram : "."$ram"."<br>";
+echo "network : "."$network"."<br>";
+
+          //echo nl2br(`ping www.google.com -c 2`)."<br>";
+                $a1="finished!!";
+                ?>
+        </h2>
+                <hr>
+
+                <h1><?=$a1?></h1>
+
+
+</body>
+</html>
+sshpass -p toor ssh -T -o StrictHostKeyChecking=yes root@192.168.1.101 'mkdir aa'
+
+
+-------------------------------------------------------------
+PHP,html을 통해서 virt-builder, virt-install 스크립트 실행하기
+
+-index.html
+<!DOCTYPE html>
+<html>
+        <head>
+                <title>가상머신 생성 페이지</title>
+        </head>
+        <body bgcolor="888888">
+                <h3>가상머신 생성하기</h3>
+                <form action="createvm.php" method="post">
+                가상머신 이름 : <input type="text" name="vmna                                                                 me"/><br>
+                가상머신 CPU 개수 :
+                <select name="vcpus">
+                        <option value="1">1 core</option>
+                        <option value="2">2 core</option>
+                </select><br>
+                가상머신 메모리 크기 :
+                <select name="ram">
+                        <option value="1024">1 GB</option>
+                        <option value="2048">2 GB</option>
+                </select><br>
+                연결할 네트워크 :
+                <select name="network">
+                        <option value="bridge">인터넷 직접 연                                                                 결함</option>
+                        <option value="nat">NAT를 통해 주소변                                                                 환 연결</option>
+                        <option value="host-only">인터넷 연결                                                                  없음</option>
+                </select><br>
+
+                <input type="submit" value="생성하기" onclick                                                                 ="alert('가상머신 생성을 시작합니다')">&nbsp;&nbsp;
+                <input type="reset" value="내용 지우기">
+
+                </form>
+
+        </body>
+</html>
+
+
+-createvm.php
+<!DOCTYPE html>
+<html>
+        <head>
+                <title>가상머신 생성 페이지</title>
+        </head>
+        <body>
+<?php
+$vmname=$_POST["vmname"];
+$vcpus=$_POST["vcpus"];
+$ram=$_POST["ram"];
+$network=$_POST["network"];
+echo "vmname : "."$vmname"."<br>";
+echo "vmcpus : "."$vcpus"."<br>";
+echo "vram : "."$ram"."<br>";
+echo "network : "."$network"."<br>";
+?>
+
+<form action="result.php" method="post">
+<input type=hidden name=vmname value=<?=$vmname?>>
+<input type=hidden name=vcpus value=<?=$vcpus?>>
+<input type=hidden name=ram value=<?=$ram?>>
+<input type=hidden name=network value=<?=$network?>>
+<input type="submit" value="생성하기">
+</form>
+
+</body>
+</html>
+
+-result.php
+
+<!DOCTYPE HTML>
+<html>
+        <head>
+                <title> yum list installed </title>
+        <head>
+
+        <style>
+                h2 { color : olive; }
+                body { text-align: center; }
+        </style>
+
+<body>
+
+                <h1> yum list test </h1>
+
+                <h1> result </h1>
+
+                <hr>
+                <h2>
+                <?php
+                $vmname=$_POST["vmname"];
+                $vcpus=$_POST["vcpus"];
+                $ram=$_POST["ram"];
+                $network=$_POST["network"];
+
+                exec("/bin/bash /var/www/html/ins1.sh $vmname $vcpus $ram");
+                echo "vmname : "."$vmname"."<br>";
+                echo "vmcpus : "."$vcpus"."<br>";
+                echo "vram : "."$ram"."<br>";
+                echo "network : "."$network"."<br>";
+                $a1="finished!!";
+                ?>
+                </h2>
+                <hr>
+
+                <h1><?=$a1?></h1>
+
+
+</body>
+</html>
+
+
+-ins1.sh
+#start install
+virt-builder cirros-0.3.5 --size 5G -o /root/${1}.img
+
+sudo virt-install --name ${1} --vcpus ${2} --ram ${3} --noautoconsole --graphics none  --disk path=/root/${1}.img --import
+
+
+ 1007  chmod 757 html/
+ 1026  chmod -R 557 /usr/share/httpd/
+
+
+id apache
+uid=48(apache) gid=48(apache) groups=48(apache),0(root),10(wheel),107(qemu)
+
+
+ 오류 나는 경우
+1. DB오류 : call to undifineed function mysqli_connect () > php-mysqlnd 설치
+2. 퍼미션 : 기타사용자에게 읽기 쓰기 실행 퍼미션 부여
+3. 쉘 동작 오류 : 직접 쉘 파일을 작성하여 사용해보기
+

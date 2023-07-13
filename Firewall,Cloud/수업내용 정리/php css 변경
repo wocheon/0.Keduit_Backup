@@ -1,0 +1,150 @@
+###index.html ###
+
+<!DOCTYPE html>
+<html>
+
+        <head>
+                <title>가상머신 생성 페이지</title>
+				<link rel="stylesheet" href="css1.css" type="text/css">
+				
+        </head>
+		<style>
+
+</style>
+		
+		
+        <body>
+			<div id="main">
+			MANAGEMENT PAGE
+			</div>
+			
+			<ul>
+			<li><a href="#home">Home</a></li>
+			<li><a href="#news">News</a></li>
+			<li><a href="#contact">Contact</a></li>
+			<li><a href="#about">About</a></li>
+			</ul>
+
+		
+                <h1>가상머신 생성하기</h1><hr><br>
+				
+				<div style="text-align: center;">		             
+				<b>step1.SELECT OPTION</b> > step2 > step3<br><br>
+		<div id="center">		             
+				<form action="createvm.php" method="post">
+                가상머신 이름 : &nbsp;&nbsp;<input type="text" name="vmname"/><br><br>
+                가상머신 CPU 개수 :&nbsp;&nbsp;
+                <select name="vcpus">
+                        <option value="1">1 core</option>
+                        <option value="2">2 core</option>
+                </select><br><br>
+                가상머신 메모리 크기 :&nbsp;&nbsp;
+                <select name="ram">
+                        <option value="1024">1 GB</option>
+                        <option value="2048">2 GB</option>
+                </select><br><br>
+                연결할 네트워크 :&nbsp;&nbsp;
+                <select name="network">
+                        <option value="bridge">인터넷 직접 연결함</option>
+                        <option value="nat">NAT를 통해 주소변환 연결</option>
+                        <option value="host-only">인터넷 연결 없음</option>
+                </select><br><br><br>
+
+                <input type="submit" value="Next" onclick="alert('가상머신 생성을 시작합니다')">&nbsp;&nbsp;
+                <input type="reset" value="reset">
+
+                </form>
+		</div>
+        </body>
+</html>
+
+
+###css file css1.css ###
+
+	@charset "utf-8";
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 5000px;
+  background-color: #339966;
+  }
+li { display: inline-block;}
+
+li a {
+  display: block;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+/* Change the link color on hover */
+li a:hover {
+  background-color: #006699;
+  color: white;
+}
+
+
+#two {
+		background-color: olive;
+		position : fixed;
+		float: right;
+			top: 0px;
+		right: 0px;
+		
+		}
+h1 { color: black; font-size: 40px; text-align: center; }
+
+h2 { color: olive; font-size: 30px; text-align: center; }
+
+h3 { color: #6666CC; font-size: 35px; text-align: center; }
+
+	#center { text-align: center; font-family : impact; }	
+	#main {font-size:4em; font-family:impact; color:#003300; text-align: center; }
+
+
+<!DOCTYPE html>
+<html>
+	<head>
+	<title> mysqlcontest </title>
+	<link rel="stylesheet" href="css1.css" type="text/css">
+	</head>
+
+	<body>
+	    <div id="main">
+		MANAGEMENT PAGE
+		</div>
+		
+		<ul>
+			<li><a href="index.html">Home</a></li>
+			<li><a href="instance.html">CreateVM</a></li>
+			<li><a href="gallery.html">Gallery</a></li>
+			<li><a href="mysqlcon.php">DB</a></li>
+			</ul>
+<h1>		
+<?php
+$con = mysqli_connect("localhost", "user1", "user1","test") or die ("Mysql 접속실패");
+echo ("MYSQL CON success!!");
+
+$sql = "SELECT * FROM vmtbl";
+$ret = mysqli_query($con, $sql);
+
+if ($ret) {
+	echo mysqli_num_rows($ret), "건 조회"."<br>";
+}
+
+else {
+	echo "데이터 조회실패!!"."<br>";
+	exit();
+}
+
+while($row = mysqli_fetch_array($ret)) {
+	echo $row['hostname'], " ", $row['vmname'], " ", $row['vcpus'], " ",$row['vram'], " ", "<br>";
+}
+
+
+mysqli_close($con);
+?>
+</h1>
+	</body>
+</html>
