@@ -1,0 +1,44 @@
+heat_template_version: 2016-10-14    
+
+resources:
+        swarm_manager:
+                type: OS::Heat::ResourceGroup
+                properties:
+                        count: 1
+                        resource_def:
+                                type: OS::Nova::Server
+                                properties:
+                                        name: test1
+                                        flavor: k8s
+                                        image: Centos7_k8s
+                                        networks:
+                                                - network: private01
+                                        key_name: openstack
+                                        security_groups:
+                                                - default
+                                        user_data: |
+                                            #!/bin/bash
+                                            sh /root/k8smaster.sh 1
+                                     
+                               
+        swarm_worker:
+                type: OS::Heat::ResourceGroup
+                metadata:
+                  depends_on: swam_manager
+                properties:
+                        count: 1
+                        resource_def:
+                                type: OS::Nova::Server
+                                properties:
+                                        name: my_vm2
+                                        flavor: k8s
+                                        image: Centos7_k8s
+                                        networks:
+                                                - network: private01
+                                        key_name: openstack
+                                        security_groups:
+                                                - default
+                                        user_data: |
+                                            #!/bin/bash
+                                            sh /root/k8sworker.sh 1
+

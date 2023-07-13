@@ -1,0 +1,184 @@
+
+
+
+      출결 및 체온 확인 해 주세요
+
+
+ \\10.5.1.100 로 들어오셔서
+ cloud->utils 아래에 있는 파일,폴더 전부 다운로드 해 두세요. 방화벽을 위한 유틸들 입니다 
+
+vmnet0 : bridge : RTL... 
+vmnet1 : host-only : 192.168.1.0
+vmnet2 : host-only : 192.168.2.0
+vmnet3 : host-only : 192.168.3.0
+vmnet8 : NAT       : 211.183.3.0
+vmnet10 : host-only : 192.168.10.0
+
+
+https://drive.google.com/file/d/1VDup2_5qZQpjLyW8HFm5EFdLOEl-0uS4/view?usp=sharing
+
+
+
+
+ Router에서의 default route
+ ip route 0.0.0.0 0.0.0.0 10.0.0.2
+
+ FW 에서의 default route
+ route outside 0 0 10.0.0.2
+ ping 8.8.8.8
+ .!!!! 또는 !!!!! "." 은 arp (기본게이트웨이인
+10.0.0.2 의 MAC 주소를 찾는다)
+ !!!!!
+
+
+
+
+
+g0/0 : outside
+g0/1 : inside
+g0/2 : dmz
+management0/0 : mgmt
+
+
+int g0/1
+ nameif inside
+ security-level 100
+ ip add 192.168.1.2 255.255.255.0
+ no sh
+!
+int g0/2
+ nameif dmz
+ security-level 50
+ ip add 192.168.2.2 255.255.255.0
+ no sh
+!
+int management 0/0
+ nameif mgmt
+ security-level 100
+ ip add 192.168.10.2 255.255.255.0
+ no sh
+!
+passwd cisco     <--- telnet 패스워드
+enable password cisco <--- enable 패스워드 
+!
+username user1 password user1 priv 15
+!
+telnet timeout 1440 <-- 1440분 동안 아무런 입출력이 없다면 화면보호기가 동작한다
+!
+telnet 0 0 mgmt   <--- mgmt 존에서 접속하는 모든 IP의 텔넷 접속을 허용하겠다!!!
+!
+wr
+
+리눅스에서 ping 10.5.1.220
+
+
+
+
+
+
+
+
+방화벽은 기본적으로 stateful packet inspection 방식으로 동작한다. 
+
+
+
+
+  ------------------(fa0/0) Router1 (fa0/1)---------------PC
+
+   access-list 111 deny ip any any
+   !
+   int fa0/0
+     ip access-group 111 in 
+
+
+
+   WEB 서버                       Client http://5.5.5.5
+   5.5.5.5:80                   192.168.1.100:1234    
+         <-------- SYN(0) ----------------
+         ----------SYN(0)/ACK(1)---------->
+         <---------ACK(1)-----------------
+         <----- sesseion established------> : 둘 사이에 통신할 수 있는 고속도로가 만들어진다.
+         <--------- GET method / index.html ----
+         ----------- index.html-----------> 
+
+
+ 방화벽은 아래의 트래픽에 대해서 처리가 가능하다.
+ 1. 로컬에서 origin 된 트래픽
+ 2. 로컬에서 terminated 되는 트래픽
+ 3. 해당 장비를 transit 하는 트래픽 
+
+ 방화벽은 security-level 을 이용하여 기본 보안 설정이 가능하다.
+ security-level  은 0부터 100 사이에서 선택이 가능하며 숫자가 높을 수록 보안이 강화된 곳이다.
+ 낮은 레벨에서 높은 레벨로의 접속은 기본적으로 차단이지만 ( ACL  ) 를 이용하여 접속이 가능하도록 할 수 있다. 
+
+ access-list 111 permit tcp any host 192.168.2.100 eq 80
+
+
+
+
+
+ciscoasa>en
+password: 
+ciscoasa# show int ip br
+
+g0/0
+g0/1
+g0/2
+management0/0
+
+network 장비에서의 인터페이스
+- 네트워크 인터페이스 , 트래픽을 transit한다
+   fa0/0, g0/0, e0
+
+- 관리 인터페이스, transit 하지 않는다.
+  종단인터페이스 
+  관리이터페이스는 해당 장비를 관리하기 위한 용도로만 사용하며 주로 telnet, ssh, gui 연결등을 위한 용도로 사용한다. 
+   management
+
+0/0 -> outside -> bridge
+0/1 -> inside  -> vmnet1
+0/2 -> dmz     -> vmnet2
+management     -> vmnet10
+
+
+object network PAT
+  subnet 192.168.2.0 255.255.255.0
+  nat (dmz,outside) dynamic int 
+
+Linux (CentOS)
+image : CentOS-7-x86_64-DVD-2009.iso
+VM 하나 만들어두세요
+
+- disk : 20GB
+- NIC : VMnet2 (192.168.2.100/24, .DG : 192.168.2.2, DNS : 8.8.8.8)
+- minimal installation(CLI)
+- CPU : 1 core, RAM : 2GB
+
+설치가 완료되고 나면 ping 192.168.2.2
+
+root : test123
+user1 : user1
+
+
+1. 아침이 되면 단톡방에 zoom 주소를 올릴 예정
+2. 줌에 들어오시면 화면에 QR 코드가 보일 겁니다. 
+3. 설치한 어플을 실행하고, 메뉴에서 QR을 선택하고 이를 이용하여 입실!!! 체크
+4. 매 시간마다.. 신호를 제가 전송합니다. 
+
+ -> 내일 : 방화벽의 원리 (stateful 이 무엇인가?)
+ -> 방화벽 기본 구성하기
+ -> security-level 을 이용한 보안 구성
+ -> 웹서버 구축과 인터넷 접속 환경 만들기!!!!
+
+
+
+
+
+
+
+
+
+
+
+
+ 

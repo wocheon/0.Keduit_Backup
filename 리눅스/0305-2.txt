@@ -1,0 +1,126 @@
+DNS 서버 구성
+- DNs? 도메인 네임 -> IP
+
+웹서비스 구성 
+ip 192.168.100.150
+hello world 뜨게
+
+
+sudo -s
+nmcli con down ens33
+nmcli con add con-name ens33-1 type ethernet ifname ens33
+nmcli con mod ens33-1 ipv4.address 192.168.100.150/24
+nmcli con mod ens33-1 ipv4.gateway 192.168.100.2
+nmcli con mod ens33-1 ipv4.dns 8.8.8.8
+nmcli con mod ens33-1 ipv4.method manual
+
+yum install httpd
+systemctl start httpd
+cd /var/www/html/
+echo "hello world" > index.html
+
+firewall-cmd --add-service=http --permanent
+firewall-cmd --reload
+
+50 client
+
+150 web service
+200 dns
+
+
+hosts 파일 사용시 발생하는 문제
+- 인터넷을 사용하는 서버가 너무 많다. -> DN
+- 검색시간이 너무 오래 걸린다...
+- 접속하는데 시간이 오래 걸린다...
+
+
+DNS
+- 계층적 구조를 갖고있다.
+- root servers
+- toplevel domain server
+    - .com
+    - .org
+    - .net
+    - .kr
+- master name server
+    - google
+        - mail
+        - search
+        - www
+        - drive
+        - map
+
+-----------------------
+local dns server
+- DNS 쿼리를 저장한 후에 host들이 질문하면 대신 답변해줌
+
+
+1. www.naver.com -> DNS
+2. www.naver.com -> localDNS
+3. www.naver.com -> root
+4. www.naver.com -> .com 
+5. www.naver.com -> naver.com
+6. www.naver.com - naver.com
+                     └ www  168.12.12.12 -> client
+https://www.google.com/search?q=dns+%EC%BF%BC%EB%A6%AC+%EB%8F%99%EC%9E%91%EC%9B%90%EB%A6%AC&source=lnms&tbm=isch&sa=X&ved=2ahUKEwiXo4GTv5jvAhWQyIsBHUwmC8wQ_AUoAXoECAQQAw&biw=1137&bih=730#imgrc=3ANwgrvCDHgaOM
+#server 192.168.100.200
+yum install -y bind*
+cat /etc/named.conf
+vim /etc/named.conf
+systemctl start named.service
+setenforce 0
+firewall-cmd --add-service=dns --permanent
+firewall-cmd --reload
+
+#client 192.168.100.124
+nslookup www.naver.com 192.168.100.200
+
+cp named.empty data/myoh210305.co.kr.zone
+cd data/
+vim myoh210305.co.kr.zone
+named-checkzone myoh210305.co.kr myoh210305.co.kr.zone
+vim /etc/named.conf
+sudo named-checkconf /etc/named.conf
+
+systemctl start named.service
+systemctl status named.service
+
+
+[root@localhost data]# cat myoh210305.co.kr.zone
+$TTL 3H
+@       IN      SOA     ns.myoh210305.co.kr root.myoh210305.co.kr (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+
+@       IN      NS      ns.myoh210305.co.kr.
+        IN      MX 10   mail.myoh210305.co.kr.
+        IN      A       192.168.100.150
+
+ns      IN      A       192.168.100.200
+mail    IN      A       192.168.100.160
+www     IN      A       192.168.100.150
+ftp     IN      CNAME   www
+
+
+[root@localhost named]# vim /etc/named.conf
+zone "myoh210305.co.kr." IN {
+        type master;
+        file "data/myoh210305.co.kr.zone";
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,136 @@
+bridge
+- host-network AD 와 연결
+- host PC와 Guest OS(VM) 같은 Network를 사용한다.
+- ipTime 공유기에서 ip를 할당 받는다.
+- 외부랑 통신가능
+
+
+host-only
+- Host PC에서 생성된 네트워크 카드와 연결된 Guest PC들의 네트워크 생성(폐쇠)
+- 외부와 통신불가, GUEST-GUEST 통신가능, 
+- HOST-GUEST통신가능
+
+
+NAT(NAPT)
+- 공인IP <-> 사설IP
+- 1개 네트워크만 생성가능
+- 외부와 통신 가능, GUEST-GUEST 통신가능,
+- HOST-GUEST 통신가능
+
+
+
+
+ 프로세스? (회사)
+ - 실행되고 있는 프로그램
+    스레드(노동자)
+        - 실제 작업하는 단위
+
+ 프로세서
+ - 프로그램을 실행하는 장치
+
+systemd(system + deamon)
+- 최상위 프로세스
+- user level에서 실행되는 최초의 프로세스
+- CentOS7
+- 이전에는 init 이라는 프로세스를 사용했다.
+- 유닛을 제어하고 관리한다.
+
+
+
+데몬
+- 사용자가 직접 제어하지 않고, 백그라운드에서 여러 작업을 수행
+- 유령처럼 살아있다.
+- ls , mkdir, touch 은 데몬이 아닌 프로그램
+
+
+systemd
+- 유닛 단위로 서비스를 관리한다.
+    - 서비스 유닛 : http, ssh, ...
+    - 소켓유닛 : 다른프로세스와 통신하는 유닛, 네트워크 소켓
+    - 마운트 유닛 : 장치를 마운팅 포인트에 연결하면 유닛생성
+    - 등등... 
+
+ 
+유닛파일의 구성
+[Unit] : 유닛의 구성정보
+[Service] : 실행할 프로세스 경로
+[Install] : systectl enable과 disable명령과 관련된 섹션
+
+
+---------------------------------------------------------
+   25  sudo yum install psmisc.x86_64
+   27  pstree
+   28  pstree -ap
+   29  man bootup
+   30  sudo systemctl status sshd
+   31  cd /usr/lib/systemd/system/
+   32  ls
+   33  yum install vim
+   34  sudo yum install vim
+   35  vim /usr/lib/systemd/system/sshd.service
+   36  vim /usr/lib/systemd/system/multi-user.target
+   37  vim bluetooth.target
+   38  sudo vim /usr/bin/unit_test.sh
+   39  ls -al /usr/bin/unit_test.sh
+   44  sudo chmod +x /usr/bin/unit_test.sh
+   45  /usr/bin/unit_test.sh
+   46  ls
+   47  pwd
+   48  vim unit_test.service
+   49  sudo vim unit_test.service
+   50  sudo systemctl start unit_test.service
+   51  sudo systemctl status unit_test.service
+   52  ps -ef
+   53  sudo systemctl enable unit_test.service
+   54  cd /etc/systemd/system/
+   55  ls -al
+   56  cd multi-user.target.wants/
+   57  ls
+   58  cd ..
+   59  ls
+   60  cd ..
+   61  ls
+   62  systemctl status unit_test.service
+   63  ls -al /usr/lib/systemd/system/unit_test.service
+
+   66  sudo find / -name unit_test.service
+   67  ls /sys/fs/cgroup/systemd/system.slice/unit_test.service
+   68  sudo systemctl enable unit_test.service
+   69  sudo systemctl disable unit_test.service
+   70  systemctl list-units
+   71  #동작중인 서비스 확인
+   72  systemctl -all list-units
+   73  #모든 유닛 확인
+   74  systemctl -t service list-units
+   75  systemctl status unit_test.service
+   76  # 유닛의 상태정보 확인가능
+   77  systemctl stop unit_test.service
+   78  history
+
+
+
+[user@localhost systemd]$ cat /usr/bin/unit_test.sh
+#!/bin/bash
+
+echo "start unit test"
+
+while (( 1 ))
+do
+    echo "this is unit test test.sh"
+    sleep 2
+done
+
+
+
+[user@localhost systemd]$ cat /usr/lib/systemd/system/unit_test.service
+[Unit]
+Description=unit test systemd service    
+
+[Service]
+type=simple
+ExecStart=/bin/bash /usr/bin/unit_test.sh
+
+[Install]
+WantedBy=multi-user.target
+
+https://c11.kr/myoh-koreait03

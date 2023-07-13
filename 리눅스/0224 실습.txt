@@ -1,0 +1,91 @@
+﻿볼륨그룹 확장 : vgextend vg명 pv명... 
+볼륨그룹 축소 : vgreduce vg명 pv명...
+물리볼륨 내용 이동 : pvmove pv명...
+
+논리볼륨 확장 : lvextend lv경로 -r(파일시스템 확장)
+xfs  파일시스템 확장 : xfs_growfs 마운트 포인트
+ext4 파일시스템 확장 : resize2fs lv경로
+
+LVM 실습
+
+LVM 확장 축소 실습
+
+파티션 모두 삭제
+파티션 용량 4,6,4,6
+/dev/sdb1~4 모두 물리 볼륨으로 생성
+
+/dev/sdb1,4 으로 볼륨 그룹 생성 (pe 단위를 16M로)
+
+lv01 4G (-L 옵션을 사용해서) 
+
+lv02 4G (-l  옵션을 사용해서)
+
+lv03 남은 용량 모두 사용 
+lvcreate myvg -l 100%FREE -n lv03
+
+lv01 은 xfs 파일시스템으로 format 해서 /mnt/disk1로 마운트 
+
+lv02 는 ext4 파일시스템으로 format 해서 /mnt/disk2로 마운트
+
+lv03 은 xfs 파일시스템으로 format 해서/mnt/disk3로 마운트 
+
+볼륨그룹에 /dev/sdb3 추가할 것
+
+lv01를 5G로 확장할 것(+ 옵션을 사용해서) -r 옵션 사용하지 말 것
+
+명령어로 파일시스템 확장
+
+lv02를 6G로 확장할 것(+ 옵션을 사용하지 말고) -r 옵션 사용하지 말 것
+
+명령어로 파일시스템 확장
+
+용량 확장 확인
+
+/dev/sdb4가 문제가 생겼습니다. /dev/sdb4를 제거하시오. 
+
+---------------------------------------------------
+
+systemctl 실습
+
+httpd 서비스 상태 확인
+
+httpd 서비스 시작
+
+httpd 서비스 활성화
+
+httpd 서비스 중지
+
+httpd 서비스 비활성화
+
+httpd 서비스 잠금
+
+httpd 서비스 잠금해제
+
+httpd 서비스 시작 후에 pid 확인
+
+httpd 서비스 리로드 후 pid 확인
+
+httpd 서비스 재시작 후 pid 확인
+
+----------------------------------------------
+
+log 실습
+
+rsyslog.conf 파일을 수정해서 cron.err 이상 내용만 /var/log/cron1 파일에 저장되도록 설정하시오.
+
+logger 명령어를 통해서 cron.info => cronlog1 와 cron.crit => cronlog2 의 메세지를 발생시켜서 /var/log/cron 파일과 /var/log/cron1 파일을 확인해보시오.
+
+journal 내용을 영구 저장하도록 설정하시오.
+
+
+
+
+
+
+
+
+
+
+
+
+
