@@ -1,0 +1,54 @@
+-기본틀 ( 로딩중에 로딩 문자열 표기)
+
+<?php
+ob_start();
+echo str_pad('', 4096);
+echo "<h2>loading</h2>";
+ob_flush();
+flush();
+ob_end_flush();
+
+sleep(3);
+echo "<br>complete!";
+$i=" ";
+?>
+
+-로딩후 다음페이지 이동 
+
+<?php
+ob_start();
+echo str_pad('', 4096);
+echo "<h2>loading</h2>";
+ob_flush();
+flush();
+ob_end_flush();
+
+
+echo("<script>location.href='flush1.php';</script>");
+
+?>
+
+
+-조건에 따른 페이지 이동
+
+<?php
+$i=2;
+
+if ( $i == 1) {
+header("location: flush.php");}
+else
+{
+header("location: obend.php");}
+
+?>
+
+ $vmname=$_POST["vmname"];
+                $vcpus=$_POST["vcpus"];
+                $ram=$_POST["ram"];
+                $network=$_POST["network"];
+
+
+<!-- 메뉴바-->
+<?php include 'include/menu.html'?>
+<!-- 하단 연락처-->
+<?php include 'include/bottom.html'?>

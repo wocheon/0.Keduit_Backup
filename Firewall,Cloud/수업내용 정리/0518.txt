@@ -1,0 +1,228 @@
+이미지 작성 및 gcp 사설 저장소에 이미지 push 하기
+- cloud build 를 이용하여 이미지 작성과 push를 한번에 할 수 있다. 
+
+- docker hub 에 이미지 올리는 방법
+이미지 이름을 dockerhub 에서 지정한 방법으로 작성해야 한다.
+  id/imagename:tag
+
+
+"CronJob"
+
+pod 의 replica   조정하기
+1. replicaset 이나 deployment 의 메니페스트 파일 내에서 replicas 3 부분을 조정하고 해당 파일을 다시 apply 하면 조정된 레플리카 수가 적용된다.
+2. kubectl scale --replicas=5 -f deployment-blue.yaml
+
+롤링업데이트!!!(*)
+파일의 내용을 수정한 다음 apply 를 하면 기존 동작하고 있던 pod 에서 업데이트가 되는 것이다. 
+
+참고로..이미지 업데이트를 하고 싶다면 
+image: test:1.0  -> image: test:2.0 으로 변경하고 kubectl apply -f 
+
+
+-------------
+- 온프레미스에 쿠버네티스 설정하기
+- pod, replicaset , deployment 작성하기
+- 서비스(node-port+HAProxy) 배포하기
+- 리소스 사용량 제한하기
+- 볼륨사용하기 (PV,PVC)
+- 모니터링하기+오토스케일 지정하기
+
+
+
+
+
+
+gcp 를 이용한 웹서버 실습
+1. 인스턴스(웹서버, DB)
+2. 인스턴스(웹서버)-인스턴스(DB)
+3. 인스턴스(웹서버)-인스턴스(DB)
+                                      -저장소
+
+
+
+        
+ -------------- 쿠버네티스 실습 환경 설정 -----------------
+  master node
+   api-server : 컨트롤 플레인(k8s의 제어판의 프론트엔드. 관리/개발자와 상호 통신)
+  key value store(etcd) : 클러스터 환경에 대한 구성 정보를 담은 데이터 베이스
+                                                    마스터,노드, pod, 컨테이너들의 상태정보를 확인할 수 있다.
+  컨트롤러 : 클러스터의 실행. 하나의 컨트롤러는 스케줄러를 참조하여 정확한 수의 포드 실행
+                     포드에 문제가 발생하면 다른 컨트롤러가 이를 감지하고 대응
+  스케줄러 : 클러스터의 상태가 올바른가, 새로운 컨테이너 요청이 들어오면 이를 어디에 
+                     배치할 것인가? 등을 담당
+
+ worker node (master 로부터의 업무를 전달받아 이를 처리하고 결과를 master 에게 보고)
+ kubelet : 컨트롤러에서 노드에 작업을 요청하면 kubelet 이 이를 받아 처리
+ kube-proxy : 네트워크 통신 담당(다양한 모듈이 있어, 선택해서 설치해 주어야 한다)
+ runtime : kubelet 으로부터 작업을 받아 실제 컨테이너를 만드는 작업을 하는 도구(docker)
+         
+ 추가요소.. 
+  DNS : 각 포드에 대해 내부적으로 사용할 수 있는 도메인 이름을 할당하고 IP와 매핑하여 처리
+  persistent storage(퍼시스턴트 스토리지) : 사용자가 기본 스토리지 인프라에 관한 상세 정보를 몰라도 리소스 요청이 가능하다.
+  -> 개발자는 서버에 필요한 추가 디스크를 서버에 연결하기 위해 NFS,iSCSI,FC 등의 기술을 몰라도 요청내용(필요용량)중 간단한 내용만을 요청하면 관리자가 미리 풀에 만들어둔 디스크와 매핑되어 자동으로 해당 볼륨을 사용할 수 있도록 해 주는 기술
+
+우분투 설치 완료후
+- 모든 노드에서
+apt-get install -y git curl wget vim
+
+vim ~/.bashrc 
+84번째 줄에 아래의 내용을 추가한다
+alias vi='vim'
+저장후 빠져 나와서 "su"
+
+vi /etc/hosts 에 아래 내용을 추가
+
+211.183.3.100  master
+211.183.3.101  node1
+211.183.3.102  node2
+211.183.3.103  node3
+
+- node1 에서만
+systemctl set-default multi-user.target
+
+
+- 모든노드에서
+스왑메모리를 허용하지 않는다. 
+
+swapoff -a
+
+- master 에서만 vmware tool 설치
+VM 메뉴에서 -> install vmware tools... 클리
+
+cp /media/docker/VM[tab]/VM[tab] .
+tar xfz VM[tab]
+cd vmware-too[tab]
+./vmware-install.pl
+
+y <-- 처음만 y 나머지는 모두 그냥 엔터
+
+
+이제 각 노드별(master, node1) 로 IP, GW, DNS 를 설정한다.
+
+node1 -> systemctl set-default graphical.target
+
+아래 내용은 모든 노드에서 실행
+
+apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+apt-cache madison docker-ce 
+apt-cache madison docker-ce-cli	
+apt-get install docker-ce=5:18.09.9~3-0~ubuntu-bionic docker-ce-cli=5:18.09.9~3-0~ubuntu-bionic containerd.io
+docker --version
+apt-get update
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+
+cat <<EOF > /etc/apt/sources.list.d/kubernetes.list
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+
+apt-get update
+apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+
+여기까지 정상적으로 완료되었다면 이제 node1 을 종료하고
+
+node1  을 복사해서 node2, node3 을 만든다.  : 복사할 때 "Create a full clone" 으로 복사하세요!!!!!!
+
+단, node2, 3 을 실행하여 아래의 내용을 점검해야 한다.
+1. hostname 변경하기
+2. node2 -> 211.183.3.102
+     node3 -> 211.183.3.103
+3. /etc/hosts 에 들어가서 node1 이라고 되어 있는 부분
+127.0.1.1       node1
+위의 부분을 각각 node1, node2 로 바꾼다
+
+4. node1 ~ 3 까지는 모두 "systemctl set-default multi-user.target" 
+5. 재부팅!!!
+ 
+위의 설정이 완료되었다면 모든 노드를 ssh  로 연결해 두세요!!!
+-------------- 점검사항------------------------
+각 노드에서 서로간에 ping 이되는지 여부 확인
+특히 각 노드에서 master 로는 반드시 ping 이 가능해야 한다.
+
+--------------------------------------------
+쿠버네티스 초기화
+
+모든 노드에서 swapoff -a 
+
+master 에서 아래의 명령을 실행하면 토큰이 발행된다.
+kubeadm init --apiserver-advertise-address 211.183.3.100 --pod-network-cidr=192.168.0.0/16
+
+kubeadm init --apiserver-advertise-address 172.16.1.25 --pod-network-cidr=192.168.0.0/16
+
+예)
+kubeadm join 211.183.3.100:6443 --token 1by71b.fi41vzfwfhej3du6 \
+        --discovery-token-ca-cert-hash sha256:2beab8e2f7ebaa5364a22b8bc78d2f6ab5aecb358eef641076b9eeff618fdb3c
+
+위와 같은 토큰이 발행되고 이 토큰을 이용하여 master 에 join 하게 된다. 방화벽에서 해당 포트를 열어주어야 한다. 단 향후 서비스의 편의를 위해 모든 노드에서 ufw disable 을 한 뒤에 위의 토큰을 각 노드에 붙여넣기 한다.
+
+이후 역시 master 노드에서 아래의 내용을 실행하여 초기화를 마무리 한다.
+root@master:~# mkdir -p $HOME/.kube
+root@master:~# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+root@master:~# sudo chown $(id -u):$(id -g) $HOME/.kube/config
+root@master:~# export KUBECONFIG=/etc/kubernetes/admin.conf
+root@master:~#
+root@master:~# kubectl get node
+NAME     STATUS     ROLES                  AGE     VERSION
+master   NotReady   control-plane,master   4m18s   v1.21.1
+node1    NotReady   <none>                 73s     v1.21.1
+node2    NotReady   <none>                 59s     v1.21.1
+node3    NotReady   <none>                 57s     v1.21.1
+root@master:~#
+
+이제 오버레이 네트워크를 위한 매니페스트 파일을 master 에서 설치하면 끝!!!
+kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+
+ 시간이 조금 지난 뒤에 master 에서 아래를 실행해 본다.
+
+root@master:~# kubectl get node
+NAME     STATUS   ROLES                             AGE     VERSION
+master   Ready    control-plane,master   11m       v1.21.1
+node1    Ready    <none>                            8m22s     v1.21.1
+node2    Ready    <none>                            8m8s       v1.21.1
+node3    Ready    <none>                            8m6s       v1.21.1
+root@master:~#
+
+  docker-hub 에 계정!!!! 
+
+
+          GS편의점 알바     3개월
+          이마트편의점 알바 6개월
+          711 편의점 알바    5개월
+
+            -> 이마트편의점 알바 1년
+
+         군제대.....교육센터
+          20.1           20.12
+
+ 자기소개서의 분량은 모두 비슷하게 작성
+자기소개서는 기-승-전-내가 이래서 너희 회사에 적당한 사람이다
+
+
+자사양식에 제출하되... ~일까지 제출 제출시 파일명은   "클라우드개발_홍길동" 으로 보내주세요
+
+ 클라우드운영_홍길동
+ 웹개발_홍길동
+
+
+ 제출 : 25일 오전 10시까지 25일 오전 9시 부터 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

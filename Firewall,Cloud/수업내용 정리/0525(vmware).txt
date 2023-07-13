@@ -1,0 +1,189 @@
+파일 이름 : 
+
+이력서_홍길동.pdf 
+
+beomtaegg@gmail.com
+
+
+이력서-자기소개서-프로젝트요약서 -> 1개파일
+: 이력서_홍길동.pdf 
+
+
+ - 글자체 통일
+ - 선 정리
+ - 자간 
+ - 전체 내용은 되도록이면 글자 수를 비슷하게!
+    (회사에서는 "장점", "특기사항", "프로젝트수행" )
+ - 한글로 열어서 
+
+10 -> 11시까지 수정
+
+
+- 자신감
+- 스펙 (진급 -> 관리직, 이직) : 학사
+   -> 고졸-> 사이버대, 방송통신대 + 학점은행제             -> 석사
+   -> 전문대 -> 학점은행제(온라인) + 자격증 -> 학사    -> 석사
+
+ 학사 -> 석사 -> 산업대학원(야간), 주말대학원(단국대학교)
+
+ 전문대 -> 방통대 -> 학사 -> 석사
+
+- 면접 (무조건 많이 보세요!!!) 3
+
+- 공부를 놓아서는 안된다. 
+- 프로젝트 마무리!!!
+- 조금 늦게 연락와도 염려마세요 
+
+
+
+
+
+
+
+
+
+
+
+VMware vSphere (서버가상화)
+서버 가상화를 환경 전체를 아울러 vSphere 
+- ESXi(하이퍼바이저)
+- vCenter(하이퍼바이저를 통합관리센터)
+    iso 파일을 windows 서버 운영체제에 설치하여 관리
+    apliance 라는 ova(vm)를 풀어서 사용할 수 있다.
+    ova,ovf,qcow2,vmdk, raw.. 가상머신 파일 포맷
+- web client (vClient) : 원격관리도구(웹,애플리케이셔-gui)
+- shell : cli (command)
+
+
+
+하이퍼바이저
+vmware 
+
+vSphere(ESXi) - type1("baremetal" 하이퍼바이저)
+(하드웨어적으로 가상화)
+
+vmware workation - type2("host based" 하이퍼바이저)
+(소프트웨어적으로 가상화)
+
+가상화를 위해서는  대표적으로 CPU 가상화가 진행되어야 한다. 
+VT-x/AMD-v
+
+
+컴퓨터/서버 -> RING  구조
+
+
+IaaS -> vSphere(ESXi, vCenter)
+-> standard, enterprise, enterprise plus
+->그냥 사용할(라이센스없이) 경우 60일 동안 무료로 사용할 수 있다 
+
+
+
+vmware 를 이용한 사설 클라우드 구축
+
+      computing        networking       storage
+        vSphere                NSX                  vSAN
+                                    overlay               storage migration
+                                    tunnel                 통합, 관리
+                                 (vxlan,gre)
+
+            nova                   neutron        cinder, switft  (openstack)
+
+                                                      5.X    ~    6.X
+          Host per a Cluster       32              64
+          VM per Cluster          4000           8000  
+            RAM per Host             4TB          12TB
+          vCPU   per VM             64               128
+          vMem per VM             1TB             4TB         
+
+ 
+
+
+ vSphere의 중요 기능들
+vCPU : 자원 불균형이 발생하지 않도록 전체 물리 CPU 가 성능을 발휘하여 작업을 진행한다. 이후에도 업무량이 늘어날 경우에는 시분할 방식으로 CPU가 작업을 진행하게 된다. 
+
+최근의 DC용 서버는 NUMA(Non-Uniform Memory Access) 구조를 띈다
+
+메모리 관리 기술(*)
+- 메모리의 효율적인 사용을 위한 기술
+   (주어진 메모리 내에서 충분히 처리 가능가능, 한쪽에 몰리지 않도록)
+     1. 투명한 페이지 기술 : 동일 종류의 VM 의 메모리는 동일 페이지를 사용하도록 한다
+     2. 메모리 벌루닝 : 유휴 VM의 메모리를 회수하여 다른(바쁜) VM에 제공
+
+- 시스템 보호를 위한 기술
+  (메모리 사용 공간이 거의 없어서 시스템 다운이 염려될 경우)
+     1. 메모리 압축  : 중복데이터를 압축, 메모리 가져올 곳 없을 때 중복데이터 중에서 우선순위가 낮은 VM의 데이터를 먼저 압축한다. 회수시 압축데이터를 풀어야 하므로 일시적으로 성능 저하가 발생한다. 
+     2. VM Kernel 스왑 : 물리 메모리가 부족할 때 물리 디스크에 일시적으로 보관한다. 
+
+스토리지 가상화의 기술
+1. RAID -> 0(stripe), 1(mirror), 1+0, 0+1, 5(parity를 1개 추가-디스크 파괴시 복구 가능, 디스크가 두개가 파괴되면 복구 불가능), 6(패리티를 2개 추가)
+
+FT(Fault Tolerance): 결함허용-> 디스크가 파괴되더라도 복구 가능한가?
+가능하다면 "FT 가 지원된다"
+
+ 0 -> FT : 지원되지 않는다. 디스크 사용률 :100%, 디스크에 동시 쓰기 하므로 빠르다
+ 1 -> FT : 지원된다. 디스크 사용률 : 50%
+ 5 -> FT : 지원된다. 3개 디스크일 경우 66% .. 디스크가 100개라면?? -> 99%
+하지만 FT가 엄청 중요한 곳에서는 대부분 1로 구성한다. 
+
+서버와 스토리지의 연결
+1. DAS(Direct Attached Storage)
+ 서버와 스토리지를 1:1 직접 연결한다. 외부에서는 스토리지로 직접 연결이 불가능하다. 
+ FC(Fiber Channel) 광 케이블을 사용한다
+
+2. NAS(Network Attached Storage)
+NFS  와 같이 네트워크를 통해 동시 접속 가능(IP이용)
+
+3. SAN(Storage Area Network)
+SAN 스위치를 별도로 구비하여 네트워크 연결한다. 구축 비용이 많이 들지만 데이터 손실이 사실상 없다고 볼 수 있다.(World Wide Name; WWN)  
+
+네트워크 관리기술
+포트그룹 : 
+- VMkernel 그룹 : vMotion, NFS/iSCSI 등 등 관리를 위한 목적으로 사용되는 포트들의 그룹
+- VM 포트그룹 : VM 이 연결되는 포트의 그룹
+
+
+ESXi 의 실제 하이퍼바이저는 VMKernel 이라 부른다
+(CentOS 의 커널에 KVM 이 있는 것처럼...)
+
+설치된 ESXi, vCenter 에 GUI를 통해 접속하는 것은 Web Client(브라우저이용), vSphere Client(애플리케이션) 을 통해 가능하다. 
+
+vSphere 는  vmdk 형식으로 포맷한 디스크를 "데이터스토어" 라고 부른다. 
+기본적으로는 로컬디스크만을 확인할 수 있다.
+만약 외부 스토리지를 사용하고 싶다면 1. nfs    2.iSCSI
+(만약 iSCSI 를 사용해 보고 싶다면 FreeBSD 기반의 freeNAS)
+
+
+ESXi 의 물리적인 NIC 에는 MAC, IP 가 없다. 
+STP 도 없다
+arp 없다. 
+
+
+vMotion, DRS, DPM, FT in Cluster
+
+
+================
+ 
+- 면접일정이 확정되면 알려주세요
+- 입사일자 "내일부처 출근가능하세요??" 피하세요!! 
+   - 일하던 사람 도망감
+       갑 : 삼성 --> 클라우드 구축/운영-> B : 
+- 수료이후 6월 16일 ->21일 정도가 적당함
+- 잡코리아(이력서 등록) -> "포트폴리오"
+
+
+오늘 지원 4곳 : 
+추천 3곳 + 1곳(자유)
+
+https://www.jobkorea.co.kr/Recruit/GI_Read/34680130?Oem_Code=C1&logpath=1
+https://www.jobkorea.co.kr/Recruit/GI_Read/34367092?Oem_Code=C1&logpath=1
+https://www.jobkorea.co.kr/Recruit/GI_Read/34266128?Oem_Code=C1&logpath=1
+
+마지막 한 곳은 자유롭게 지원(희망직무) 
+지원을 하셨다면 잡코리아 링크 주소를 저에게 보내주세요!
+
+pdf 용량 줄이기 : https://www.adobe.com/kr/acrobat/online/compress-pdf.html
+
+
+
+
+
